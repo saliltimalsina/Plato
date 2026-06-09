@@ -17,12 +17,14 @@ interface ModalShellProps {
   title: string;
   subtitle?: string;
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "full";
+  /** extra classes appended to Modal base — use for custom max-w overrides */
+  baseClassName?: string;
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
 
-export function ModalShell({ title, subtitle, size = "lg", onClose, children, footer }: ModalShellProps) {
+export function ModalShell({ title, subtitle, size = "lg", baseClassName = "", onClose, children, footer }: ModalShellProps) {
   return (
     <Modal
       isOpen
@@ -31,7 +33,7 @@ export function ModalShell({ title, subtitle, size = "lg", onClose, children, fo
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        base: "rounded-[22px] overflow-hidden max-sm:m-0 max-sm:rounded-b-none max-sm:absolute max-sm:bottom-0 max-sm:max-h-[94%]",
+        base: `rounded-[22px] overflow-hidden max-sm:m-0 max-sm:rounded-b-none max-sm:absolute max-sm:bottom-0 max-sm:max-h-[94%] ${baseClassName}`,
         closeButton: "top-[16px] right-[18px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100",
       }}
     >

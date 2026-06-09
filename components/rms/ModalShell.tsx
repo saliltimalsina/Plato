@@ -16,7 +16,7 @@ export const inputCx = "text-[13.5px] text-ink placeholder:text-warm-500";
 interface ModalShellProps {
   title: string;
   subtitle?: string;
-  size?: "sm" | "md" | "lg" | "xl" | "2xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "full";
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;

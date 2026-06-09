@@ -3,30 +3,26 @@
 import { useState } from "react";
 import {
   Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem,
-  Input, Select, SelectItem,
+  Input, Textarea,
 } from "@heroui/react";
 import { Ruler, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { ListScaffold } from "@/components/rms/ListScaffold";
 import {
   ModalShell, ModalFooterButtons, DeleteModal, labelCx, wrapCx, inputCx,
 } from "@/components/rms/ModalShell";
-import { Badge, Tone, KpiData } from "@/components/rms/primitives";
+import { KpiData } from "@/components/rms/primitives";
 import { useListState } from "@/components/rms/useListState";
-import { MeasuringUnit, MEASURING_UNITS, UNIT_TYPES } from "@/components/rms/data/inventory";
+import { MeasuringUnit, MEASURING_UNITS } from "@/components/rms/data/inventory";
+
+const Req = () => <span className="text-[#F15022] ml-[2px]">*</span>;
 
 const COLUMNS = [
   { key: "sn", label: "SN" },
-  { key: "name", label: "Name", sortable: true },
-  { key: "symbol", label: "Symbol" },
-  { key: "type", label: "Type" },
+  { key: "symbol", label: "Short Name", sortable: true },
+  { key: "name", label: "Unit Name", sortable: true },
+  { key: "description", label: "Description" },
   { key: "actions", label: "", align: "center" as const },
 ];
-
-const TYPE_TONE: Record<MeasuringUnit["type"], Tone> = {
-  Weight: "primary",
-  Volume: "secondary",
-  Count: "neutral",
-};
 
 /* ── create / edit modal ──────────────────────────────────────── */
 function UnitModal({
@@ -34,38 +30,59 @@ function UnitModal({
 }: { unit: MeasuringUnit | null; onClose: () => void; onSave: (u: MeasuringUnit) => void }) {
   const [name, setName] = useState(unit?.name ?? "");
   const [symbol, setSymbol] = useState(unit?.symbol ?? "");
-  const [type, setType] = useState<MeasuringUnit["type"]>(unit?.type ?? "Weight");
+  const [description, setDescription] = useState(unit?.description ?? "");
 
-  const valid = name.trim().length > 0;
+  const valid = name.trim().length > 0 && symbol.trim().length > 0;
   const submit = () =>
-    onSave({ id: unit?.id ?? 0, name: name.trim(), symbol: symbol.trim(), type });
+    onSave({
+      id: unit?.id ?? 0,
+      name: name.trim(),
+      symbol: symbol.trim(),
+      type: unit?.type ?? "Weight",
+      description: description.trim(),
+    });
+
+  const reset = () => { setName(unit?.name ?? ""); setSymbol(unit?.symbol ?? ""); setDescription(unit?.description ?? ""); };
 
   return (
     <ModalShell
-      title={unit ? "Edit Unit" : "Add Unit"}
-      subtitle={unit ? "Update this measuring unit." : "Create a new measuring unit."}
-      size="sm"
+      title={unit ? "Edit Measuring Unit" : "Create Measuring Unit"}
+      size="lg"
       onClose={onClose}
-      footer={<ModalFooterButtons onCancel={onClose} onConfirm={submit} confirmLabel={unit ? "Save changes" : "Add Unit"} disabled={!valid} />}
+      footer={
+        <div className="flex items-center justify-between gap-3 w-full">
+          <Button variant="light" radius="md" className="font-semibold text-warm-600" onPress={reset}>
+            Reset
+          </Button>
+          <ModalFooterButtons onCancel={onClose} onConfirm={submit} confirmLabel={unit ? "Save changes" : "Save Measuring Unit"} disabled={!valid} />
+        </div>
+      }
     >
-      <Input
-        label="Name" labelPlacement="outside" placeholder="e.g. Kilogram"
-        size="sm" variant="bordered" value={name} onValueChange={setName}
-        classNames={{ label: labelCx, inputWrapper: wrapCx, input: inputCx }}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          autoFocus
+          label={<>Measuring Unit<Req /></>}
+          labelPlacement="outside"
+          placeholder="Enter unit, eg: Kilogram, Litre, Pieces"
+          size="sm" variant="bordered" value={name} onValueChange={setName}
+          classNames={{ label: labelCx, inputWrapper: wrapCx, input: inputCx }}
+        />
+        <Input
+          label={<>Short Name<Req /></>}
+          labelPlacement="outside"
+          placeholder="Enter short name, eg: kg, l, pcs"
+          size="sm" variant="bordered" value={symbol} onValueChange={setSymbol}
+          classNames={{ label: labelCx, inputWrapper: wrapCx, input: inputCx }}
+        />
+      </div>
+      <Textarea
+        label="Description" labelPlacement="outside"
+        placeholder="Enter description"
+        minRows={2} maxLength={200}
+        value={description} onValueChange={setDescription}
+        variant="bordered"
+        classNames={{ label: labelCx, inputWrapper: `${wrapCx} h-auto min-h-[64px]`, input: inputCx }}
       />
-      <Input
-        label="Symbol" labelPlacement="outside" placeholder="e.g. kg"
-        size="sm" variant="bordered" value={symbol} onValueChange={setSymbol}
-        classNames={{ label: labelCx, inputWrapper: wrapCx, input: inputCx }}
-      />
-      <Select
-        label="Type" labelPlacement="outside" placeholder="Select type"
-        size="sm" variant="bordered" selectedKeys={[type]}
-        onSelectionChange={(k) => { const v = [...k][0]; if (v) setType(String(v) as MeasuringUnit["type"]); }}
-        classNames={{ label: labelCx, trigger: wrapCx, value: inputCx }}
-      >
-        {UNIT_TYPES.map((t) => <SelectItem key={t}>{t}</SelectItem>)}
-      </Select>
     </ModalShell>
   );
 }
@@ -73,8 +90,8 @@ function UnitModal({
 export default function MeasuringUnitsPage() {
   const s = useListState<MeasuringUnit>({
     initial: MEASURING_UNITS.map((u) => ({ ...u })),
-    searchableText: (u) => `${u.name} ${u.symbol}`,
-    sortAccessors: { name: (u) => u.name.toLowerCase() },
+    searchableText: (u) => `${u.name} ${u.symbol} ${u.description ?? ""}`,
+    sortAccessors: { name: (u) => u.name.toLowerCase(), symbol: (u) => u.symbol.toLowerCase() },
   });
 
   const kpis: KpiData[] = [
@@ -83,10 +100,14 @@ export default function MeasuringUnitsPage() {
 
   const renderCell = (u: MeasuringUnit, key: string) => {
     switch (key) {
-      case "sn": return <span className="font-mono text-[12.5px] text-warm-500">{String(u.id).padStart(2, "0")}</span>;
-      case "name": return <span className="text-[13.5px] font-bold text-ink whitespace-nowrap">{u.name}</span>;
-      case "symbol": return <Badge tone="neutral"><span className="font-mono">{u.symbol}</span></Badge>;
-      case "type": return <Badge tone={TYPE_TONE[u.type]}>{u.type}</Badge>;
+      case "sn": return <span className="font-mono text-[12.5px] text-warm-500">{u.id}</span>;
+      case "symbol": return <span className="font-mono text-[13px] font-semibold text-ink">{u.symbol}</span>;
+      case "name": return <span className="text-[13.5px] font-semibold text-ink whitespace-nowrap">{u.name}</span>;
+      case "description": return (
+        <span className="text-[12.5px] text-warm-600 line-clamp-1 max-w-[520px]">
+          {u.description?.trim() || <span className="text-warm-400">—</span>}
+        </span>
+      );
       case "actions": return (
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
@@ -104,13 +125,16 @@ export default function MeasuringUnitsPage() {
 
   const renderCard = (u: MeasuringUnit) => (
     <div className="bg-white border border-[#EEEAE6] rounded-2xl p-[14px]">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[15px] font-bold text-ink">{u.name}</div>
-          <div className="mt-[6px] flex items-center gap-[7px]">
-            <Badge tone="neutral"><span className="font-mono">{u.symbol}</span></Badge>
-            <Badge tone={TYPE_TONE[u.type]}>{u.type}</Badge>
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-[13px] font-bold text-ink">{u.symbol}</span>
+            <span className="text-warm-300">·</span>
+            <span className="text-[14px] font-semibold text-ink">{u.name}</span>
           </div>
+          {u.description?.trim() && (
+            <div className="mt-1 text-[12px] text-warm-600 line-clamp-2">{u.description}</div>
+          )}
         </div>
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
@@ -129,14 +153,14 @@ export default function MeasuringUnitsPage() {
     <>
       <ListScaffold
         state={s}
-        title="Measuring Units"
+        title="Measuring Unit"
         kpis={kpis}
         totalCount={s.items.length}
         columns={COLUMNS}
         renderCell={renderCell}
         renderCard={renderCard}
         searchPlaceholder="Search units…"
-        addLabel="Add Unit"
+        addLabel="Add New"
         onAdd={() => s.setEditing(null)}
       />
 

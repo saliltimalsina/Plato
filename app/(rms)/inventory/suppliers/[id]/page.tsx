@@ -4,15 +4,16 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, addToast,
+  Drawer, DrawerContent, DrawerHeader, DrawerBody,
 } from "@heroui/react";
 import {
   ArrowLeft, Phone, Send, FileText, Plus, MoreHorizontal, Link as LinkIcon,
   DollarSign, RotateCcw, ArrowDown, ArrowUp, LucideIcon, CreditCard, SlidersHorizontal,
-  Pencil, Percent, Trash2,
+  Pencil, Percent, Trash2, Paperclip, Inbox,
 } from "lucide-react";
 import { Avatar, ORANGE } from "@/components/rms/primitives";
 import {
-  SUPPLIERS, Supplier, SUPPLIER_SUMMARY, SUPPLIER_TXNS, SUPPLIER_ACTIVITY,
+  SUPPLIERS, Supplier, SupplierTxn, SUPPLIER_SUMMARY, SUPPLIER_TXNS, SUPPLIER_ACTIVITY,
 } from "@/components/rms/data/suppliers";
 import {
   PaymentInModal, PaymentOutModal, AddPurchaseBillModal, AddDebitNoteModal,
@@ -36,6 +37,7 @@ export default function SupplierDetailPage() {
 
   const [modal, setModal] = useState<FinanceModal>(null);
   const [tab, setTab] = useState<"txn" | "activity" | "credit">("txn");
+  const [viewTxn, setViewTxn] = useState<SupplierTxn | null>(null);
 
   const toast = (msg: string) => addToast({ title: msg, color: "success", timeout: 2800 });
   const bal = balanceLabel(supplier);
@@ -204,7 +206,7 @@ export default function SupplierDetailPage() {
               </Button>
             </div>
             <div className="mt-2">
-              {tab === "txn" && <TxnTable />}
+              {tab === "txn" && <TxnTable onSelect={setViewTxn} />}
               {tab === "activity" && <ActivityList />}
               {tab === "credit" && <EmptyCredit />}
             </div>
@@ -217,6 +219,8 @@ export default function SupplierDetailPage() {
       {modal === "out" && <PaymentOutModal supplierName={supplier.name} onClose={() => setModal(null)} onDone={toast} />}
       {modal === "bill" && <AddPurchaseBillModal supplierName={supplier.name} onClose={() => setModal(null)} onDone={toast} />}
       {modal === "note" && <AddDebitNoteModal supplierName={supplier.name} onClose={() => setModal(null)} onDone={toast} />}
+
+      {viewTxn && <TxnDetailDrawer txn={viewTxn} supplierName={supplier.name} onClose={() => setViewTxn(null)} />}
     </div>
   );
 }
@@ -250,7 +254,7 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 }
 
 /* ── tabs content ──────────────────────────────────────────────── */
-function TxnTable() {
+function TxnTable({ onSelect }: { onSelect: (t: SupplierTxn) => void }) {
   const COLS = "44px 100px 1fr 120px 110px 130px 110px";
   return (
     <div className="mt-2">
@@ -261,7 +265,11 @@ function TxnTable() {
           <span className="text-right">Amount</span><span className="text-right">Closing Balance</span><span className="text-right">TXN Date</span>
         </div>
         {SUPPLIER_TXNS.map((t, i) => (
-          <div key={t.id} className="grid px-3 py-[11px] items-center min-w-[760px]"
+          <div key={t.id}
+            onClick={() => onSelect(t)}
+            role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(t); }}
+            className="grid px-3 py-[11px] items-center min-w-[760px] cursor-pointer hover:bg-warm-50 transition-colors"
             style={{ gridTemplateColumns: COLS, borderBottom: i === SUPPLIER_TXNS.length - 1 ? "none" : "1px solid #F4EFEB" }}>
             <span className="text-[12px] font-mono text-warm-500">{i + 1}</span>
             <span className="text-[12px] font-mono font-semibold text-[#0EA5E9]">{t.txnNo}</span>
@@ -307,5 +315,176 @@ function EmptyCredit() {
       <div className="w-[40px] h-[40px] rounded-[12px] bg-warm-100 flex items-center justify-center"><CreditCard size={18} color="#C9BCB0" /></div>
       <span className="text-[13px] text-warm-500 font-medium">No credits</span>
     </div>
+  );
+}
+
+/* ── transaction detail drawer ─────────────────────────────────── */
+interface Attachment { id: number; name: string; url: string }
+const MAX_ATTACH = 5;
+
+function TxnDetailDrawer({
+  txn, supplierName, onClose,
+}: { txn: SupplierTxn; supplierName: string; onClose: () => void }) {
+  const isCredit = txn.txnType === "Payment In" || txn.txnType === "Debit Note";
+  const amountColor = isCredit ? "#15803D" : "#C2410C";
+  const settled = txn.unpaid === "Rs 0";
+
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const fileInputId = `txn-attach-${txn.id}`;
+
+  const onFiles = (files: FileList | null) => {
+    if (!files) return;
+    const room = MAX_ATTACH - attachments.length;
+    const next = Array.from(files).slice(0, room).map((f, i) => ({
+      id: Date.now() + i,
+      name: f.name,
+      url: URL.createObjectURL(f),
+    }));
+    setAttachments((a) => [...a, ...next]);
+  };
+  const remove = (id: number) =>
+    setAttachments((a) => {
+      const dropped = a.find((x) => x.id === id);
+      if (dropped) URL.revokeObjectURL(dropped.url);
+      return a.filter((x) => x.id !== id);
+    });
+
+  return (
+    <Drawer
+      isOpen onClose={onClose} placement="right" size="md"
+      classNames={{
+        base: "sm:max-w-[440px]",
+        closeButton: "top-[14px] right-[14px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100 z-10",
+      }}
+    >
+      <DrawerContent>
+        <DrawerHeader className="border-b border-warm-200 pr-[52px]">
+          <span className="text-[18px] font-extrabold text-ink tracking-[-0.02em]">Transaction Details</span>
+        </DrawerHeader>
+
+        <DrawerBody className="px-5 gap-[18px]">
+          {/* top card */}
+          <div className="border border-warm-200 rounded-[14px] p-4 bg-warm-50">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[14px] font-extrabold text-ink truncate">{txn.particular}</div>
+                <div className="mt-2 flex items-center gap-[6px] flex-wrap">
+                  <span className="inline-flex items-center px-[9px] py-[3px] rounded-md text-[11px] font-bold bg-warm-100 text-warm-700">
+                    {txn.txnType}
+                  </span>
+                  <span className="inline-flex items-center px-[9px] py-[3px] rounded-md text-[11px] font-bold"
+                    style={{ background: settled ? "#E7F6EC" : "#FDECE4", color: settled ? "#15803D" : "#C2410C" }}>
+                    {settled ? "Paid" : "Due"}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-baseline gap-1">
+                  <span className="text-[16px] font-extrabold tnum" style={{ color: amountColor }}>{txn.amount}</span>
+                  {isCredit
+                    ? <ArrowUp size={13} color={amountColor} strokeWidth={2.6} />
+                    : <ArrowDown size={13} color={amountColor} strokeWidth={2.6} />}
+                </div>
+                <div className="mt-1 text-[12px] text-warm-500 tnum">{txn.date}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* attachments */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-[13px] font-extrabold text-ink">Attachments</h3>
+              {attachments.length > 0 && (
+                <span className="text-[12px] text-warm-500 font-semibold tnum">
+                  {attachments.length}/{MAX_ATTACH}
+                </span>
+              )}
+            </div>
+            <input
+              id={fileInputId} type="file" accept="image/*" multiple hidden
+              onChange={(e) => { onFiles(e.target.files); e.currentTarget.value = ""; }}
+            />
+            {attachments.length === 0 ? (
+              <label htmlFor={fileInputId}
+                className="inline-flex items-center gap-2 h-9 px-3 rounded-[10px] border border-[#E6E1DC] bg-white hover:bg-warm-100 text-warm-700 text-[12.5px] font-semibold cursor-pointer">
+                <Paperclip size={14} color="#6B5F55" />
+                Add Attachments
+              </label>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {attachments.map((a) => (
+                  <div key={a.id} className="relative w-[72px] h-[72px] rounded-[10px] border border-warm-200 bg-warm-50 overflow-hidden group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.url} alt={a.name} className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => remove(a.id)}
+                      title="Remove"
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-ink/70 text-white flex items-center justify-center text-[10px] font-bold hover:bg-ink"
+                      style={{ background: "rgba(34,28,22,0.72)" }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {attachments.length < MAX_ATTACH && (
+                  <label htmlFor={fileInputId}
+                    className="w-[72px] h-[72px] rounded-[10px] border-[1.5px] border-dashed border-warm-200 hover:border-[#F15022] hover:bg-warm-50 flex flex-col items-center justify-center gap-[2px] cursor-pointer transition-colors">
+                    <Plus size={16} color="#8A7D72" strokeWidth={2.4} />
+                    <span className="text-[11px] font-semibold text-warm-600">Add</span>
+                  </label>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* account summary */}
+          <div>
+            <h3 className="text-[13px] font-extrabold text-ink mb-2">Account Summary</h3>
+            <div className="border border-warm-200 rounded-[12px] overflow-hidden">
+              <div className="grid bg-cream border-b border-warm-200 px-3 py-2 text-[10.5px] font-bold text-warm-500 uppercase tracking-[0.04em]"
+                style={{ gridTemplateColumns: "1.4fr 0.9fr 0.9fr" }}>
+                <span>Accounts Heads</span>
+                <span className="text-right">Debit</span>
+                <span className="text-right">Credit</span>
+              </div>
+              <div className="grid px-3 py-[10px] items-center"
+                style={{ gridTemplateColumns: "1.4fr 0.9fr 0.9fr", borderBottom: "1px solid #F4EFEB" }}>
+                <span className="text-[12.5px] font-semibold text-[#0EA5E9] truncate">
+                  {supplierName.toLowerCase().replace(/\s+/g, " ")} <span className="text-warm-500 font-medium">(Supplier)</span>
+                </span>
+                <span className="text-[13px] font-semibold text-ink text-right tnum">
+                  {isCredit ? "—" : txn.amount}
+                </span>
+                <span className="text-[13px] font-semibold text-ink text-right tnum">
+                  {isCredit ? txn.amount : "—"}
+                </span>
+              </div>
+              <div className="grid px-3 py-[10px] items-center bg-warm-50"
+                style={{ gridTemplateColumns: "1.4fr 0.9fr 0.9fr" }}>
+                <span className="text-[12.5px] font-extrabold text-ink">Total</span>
+                <span className="text-[13px] font-extrabold text-ink text-right tnum">
+                  {isCredit ? "0" : txn.amount}
+                </span>
+                <span className="text-[13px] font-extrabold text-ink text-right tnum">
+                  {isCredit ? txn.amount : "0"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* activities */}
+          <div>
+            <h3 className="text-[13px] font-extrabold text-ink mb-2">Activities</h3>
+            <div className="border-[1.5px] border-dashed border-warm-200 rounded-[12px] py-[34px] flex flex-col items-center gap-2">
+              <div className="w-[44px] h-[44px] rounded-[12px] bg-warm-100 flex items-center justify-center">
+                <Inbox size={20} color="#C9BCB0" />
+              </div>
+              <span className="text-[13px] font-bold text-ink">No Activities found</span>
+              <span className="text-[12px] text-warm-500 font-medium">No activities found.</span>
+            </div>
+          </div>
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
   );
 }

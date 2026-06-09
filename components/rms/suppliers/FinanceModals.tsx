@@ -403,8 +403,8 @@ export function AddPurchaseBillModal({ supplierName, onClose, onDone }: BaseProp
     <ModalShell
       title="Add Purchase Bill"
       subtitle={`Log a purchase from ${supplier}.`}
-      size="5xl"
-      baseClassName="!max-w-[96vw] lg:!max-w-[1280px]"
+      size="full"
+      baseClassName="!max-w-[96vw] lg:!max-w-[1180px] xl:!max-w-[1340px] !h-auto !max-h-[92vh] !my-4 !rounded-[22px]"
       onClose={onClose}
       footer={
         <div className="flex items-center justify-end gap-3 w-full">
@@ -469,7 +469,7 @@ export function AddPurchaseBillModal({ supplierName, onClose, onDone }: BaseProp
         <h3 className="text-[13px] font-extrabold text-ink mb-2">Item Details</h3>
         <div className="border border-warm-200 rounded-[12px] overflow-x-auto">
           <div
-            className="grid gap-x-3 bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em] min-w-[980px]"
+            className="grid gap-x-3 bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em] min-w-[920px]"
             style={{ gridTemplateColumns: "40px 1.4fr 1.3fr 0.95fr 0.85fr 0.95fr 1fr 1.3fr 40px" }}
           >
             <span>SN</span><span>Stock Item</span><span>Description</span>
@@ -486,7 +486,7 @@ export function AddPurchaseBillModal({ supplierName, onClose, onDone }: BaseProp
             return (
               <div
                 key={row.id}
-                className="grid gap-x-3 px-4 py-3 items-center min-w-[980px]"
+                className="grid gap-x-3 px-4 py-3 items-center min-w-[920px]"
                 style={{
                   gridTemplateColumns: "40px 1.4fr 1.3fr 0.95fr 0.85fr 0.95fr 1fr 1.3fr 40px",
                   borderBottom: i === rows.length - 1 ? "none" : "1px solid #F4EFEB",
@@ -704,8 +704,8 @@ export function AddDebitNoteModal({ supplierName, onClose, onDone }: BaseProps) 
   return (
     <ModalShell
       title="Purchase Return (Debit Note)"
-      size="5xl"
-      baseClassName="!max-w-[96vw] lg:!max-w-[1280px]"
+      size="full"
+      baseClassName="!max-w-[96vw] lg:!max-w-[1180px] xl:!max-w-[1340px] !h-auto !max-h-[92vh] !my-4 !rounded-[22px]"
       onClose={onClose}
       footer={
         <div className="flex items-center justify-end gap-3 w-full">
@@ -769,7 +769,7 @@ export function AddDebitNoteModal({ supplierName, onClose, onDone }: BaseProps) 
         <h3 className="text-[13px] font-extrabold text-ink mb-2">Item Details</h3>
         <div className="border border-warm-200 rounded-[12px] overflow-x-auto">
           <div
-            className="grid gap-x-3 bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em] min-w-[980px]"
+            className="grid gap-x-3 bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em] min-w-[920px]"
             style={{ gridTemplateColumns: "40px 1.4fr 1.3fr 0.95fr 0.85fr 0.95fr 1fr 1.3fr 40px" }}
           >
             <span>SN</span><span>Stock Item</span><span>Description</span>
@@ -779,7 +779,7 @@ export function AddDebitNoteModal({ supplierName, onClose, onDone }: BaseProps) 
           {rows.map((row, i) => {
             const amount = (Number(row.qty) || 0) * (Number(row.rate) || 0);
             return (
-              <div key={row.id} className="grid gap-x-3 px-4 py-3 items-center min-w-[980px]"
+              <div key={row.id} className="grid gap-x-3 px-4 py-3 items-center min-w-[920px]"
                 style={{
                   gridTemplateColumns: "40px 1.4fr 1.3fr 0.95fr 0.85fr 0.95fr 1fr 1.3fr 40px",
                   borderBottom: i === rows.length - 1 ? "none" : "1px solid #F4EFEB",

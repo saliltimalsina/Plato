@@ -43,22 +43,27 @@ export type MovementType = "Stock In" | "Stock Out" | "Opening" | "Adjustment";
 
 export interface StockHistoryRow {
   id: number;
-  date: string;
-  item: string;
+  date: string;          // e.g. "2026-06-08 | 12:51 PM"
+  item: string;          // Stock Item (Salil Timalsina, Lettuce, etc.)
+  groups: string[];      // Stock Group tags
+  particular: string;    // e.g. "Opening Opening"
+  particularKind: string;// e.g. "Opening", "Stock Out", "Stock In"
+  party: string;         // Parties
   type: MovementType;
-  qty: string;
-  balance: string;
-  by: string;
+  opening: string;       // qty before
+  in: string;            // qty in
+  out: string;           // qty out
+  closing: string;       // qty after
+  rate: string;          // "Rs 200"
+  amount: string;        // "Rs 12000"
+  amountUp: boolean;     // direction
+  stockValue: string;    // "Rs 12000"
+  by: string;            // staff
 }
 
 export const STOCK_HISTORY: StockHistoryRow[] = [
-  { id: 1, date: "2026-06-05", item: "Lettuce",        type: "Opening",    qty: "+60.00 kg",  balance: "60.00 kg",  by: "Salil Timalsina" },
-  { id: 2, date: "2026-06-05", item: "Tomato",         type: "Opening",    qty: "+40.00 kg",  balance: "40.00 kg",  by: "Salil Timalsina" },
-  { id: 3, date: "2026-06-06", item: "Tomato",         type: "Stock Out",  qty: "-8.00 kg",   balance: "32.00 kg",  by: "Kitchen" },
-  { id: 4, date: "2026-06-06", item: "Chicken Breast", type: "Stock Out",  qty: "-6.50 kg",   balance: "18.50 kg",  by: "Kitchen" },
-  { id: 5, date: "2026-06-07", item: "Mozzarella",     type: "Stock Out",  qty: "-8.60 kg",   balance: "6.40 kg",   by: "Kitchen" },
-  { id: 6, date: "2026-06-07", item: "Coca Cola",      type: "Stock In",   qty: "+24 btl",    balance: "98 btl",    by: "Salil Timalsina" },
-  { id: 7, date: "2026-06-08", item: "Espresso Beans", type: "Adjustment", qty: "-0.50 kg",   balance: "2.10 kg",   by: "Salil Timalsina" },
+  { id: 1, date: "2026-06-08 | 12:51 PM", item: "Salil Timalsina", groups: [],                     particular: "Opening", particularKind: "Opening",   party: "Salil Timalsina", type: "Opening",   opening: "0.00",  in: "—", out: "—", closing: "0.00 kg",  rate: "Rs 0",   amount: "Rs 0",     amountUp: true,  stockValue: "Rs 0",     by: "Salil Timalsina" },
+  { id: 2, date: "2026-06-05 | 03:10 PM", item: "Lettuce",         groups: ["Drinks", "Vegetable"],particular: "Opening", particularKind: "Opening",   party: "Salil Timalsina", type: "Opening",   opening: "60.00", in: "—", out: "—", closing: "60.00 kg", rate: "Rs 200", amount: "Rs 12000", amountUp: true,  stockValue: "Rs 12000", by: "Salil Timalsina" },
 ];
 
 export const MOVEMENT_TONE: Record<MovementType, "success" | "danger" | "primary" | "neutral"> = {

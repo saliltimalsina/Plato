@@ -32,7 +32,18 @@ export const NAV: NavSection[] = [
   {
     title: "Management",
     items: [
-      { label: "Menu", icon: UtensilsCrossed, href: "/menu" },
+      {
+        label: "Menu",
+        icon: UtensilsCrossed,
+        children: [
+          { label: "Dishes",          href: "/menu/dishes" },
+          { label: "Category",        href: "/menu/category" },
+          { label: "Add-Ons & Extras", href: "/menu/addons" },
+          { label: "Menu Set",        href: "/menu/menu-sets" },
+          { label: "Sub Menu",        href: "/menu/sub-menus" },
+          { label: "Combo Offer",     href: "/menu/combo-offers" },
+        ],
+      },
       {
         label: "Inventory",
         icon: Package,

@@ -6,7 +6,7 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter,
 } from "@heroui/react";
 import {
-  Calendar, Plus, Trash2, UploadCloud, Inbox,
+  Calendar, Plus, Trash2, UploadCloud, Inbox, X,
 } from "lucide-react";
 import { ModalShell, ModalFooterButtons, labelCx, wrapCx, inputCx } from "@/components/rms/ModalShell";
 import { ITEMS as STOCK_ITEMS, UNITS } from "@/components/stock/data";
@@ -176,12 +176,17 @@ function PaymentDrawer({
     <Drawer isOpen onClose={onClose} placement="right" size="md"
       classNames={{
         base: "sm:max-w-[520px]",
-        closeButton: "top-[14px] right-[14px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100 z-10",
+        closeButton: "hidden",
       }}
     >
       <DrawerContent>
-        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200 pr-[52px]">
-          <span className="text-[18px] font-extrabold text-ink tracking-[-0.02em]">{title}</span>
+        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200">
+          <span className="flex-1 text-[18px] font-extrabold text-ink tracking-[-0.02em]">{title}</span>
+          <Button isIconOnly size="sm" variant="bordered" radius="md"
+            className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white"
+            onPress={onClose}>
+            <X size={16} color="#8A7D72" />
+          </Button>
         </DrawerHeader>
 
         <DrawerBody className="px-5 gap-[14px]">

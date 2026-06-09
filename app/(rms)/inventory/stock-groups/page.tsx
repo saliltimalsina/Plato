@@ -6,7 +6,7 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerBody,
 } from "@heroui/react";
 import {
-  Layers, DollarSign, Star, MoreHorizontal, Pencil, Trash2, Box, Shuffle, Check,
+  Layers, DollarSign, Star, MoreHorizontal, Pencil, Trash2, Box, Shuffle, Check, X,
 } from "lucide-react";
 import { ListScaffold } from "@/components/rms/ListScaffold";
 import {
@@ -163,11 +163,11 @@ function GroupDrawer({
       isOpen onClose={onClose} placement="right" size="sm"
       classNames={{
         base: "sm:max-w-[460px]",
-        closeButton: "top-[14px] right-[14px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100 z-10",
+        closeButton: "hidden",
       }}
     >
       <DrawerContent>
-        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200 pr-[52px]">
+        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200">
           <div className="flex-1 min-w-0 flex items-center gap-[9px]">
             <span className="w-[10px] h-[10px] rounded-full" style={{ background: group.color }} />
             <span className="text-[18px] font-extrabold text-ink tracking-[-0.02em] truncate">{group.name}</span>
@@ -190,6 +190,11 @@ function GroupDrawer({
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
+          <Button isIconOnly size="sm" variant="bordered" radius="md"
+            className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white"
+            onPress={onClose}>
+            <X size={16} color="#8A7D72" />
+          </Button>
         </DrawerHeader>
 
         <DrawerBody className="px-5">

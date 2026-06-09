@@ -4,7 +4,7 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, Button,
 } from "@heroui/react";
 import {
-  Box, TrendingUp, TrendingDown, Clock, ChevronDown, Pencil, Trash2,
+  Box, TrendingUp, TrendingDown, Clock, ChevronDown, Pencil, Trash2, X,
   LucideIcon,
 } from "lucide-react";
 import {
@@ -47,11 +47,11 @@ export function DetailDrawer({ item, onClose, onEdit, onDelete }: Props) {
       size="sm"
       classNames={{
         base: "sm:max-w-[460px]",
-        closeButton: "top-[14px] right-[14px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100 z-10",
+        closeButton: "hidden",
       }}
     >
       <DrawerContent>
-        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200 pr-[52px]">
+        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200">
           <div className="flex-1 min-w-0 flex items-center gap-[9px]">
             <span className="text-[18px] font-extrabold text-ink tracking-[-0.02em] truncate">{item.name}</span>
             <span className="text-[11px] font-semibold font-mono text-warm-500 bg-warm-200 px-[7px] py-[2px] rounded-md flex-shrink-0">
@@ -64,6 +64,9 @@ export function DetailDrawer({ item, onClose, onEdit, onDelete }: Props) {
           </Button>
           <Button isIconOnly size="sm" variant="bordered" radius="md" className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white" onPress={() => onDelete(item)}>
             <Trash2 size={16} color={ORANGE} />
+          </Button>
+          <Button isIconOnly size="sm" variant="bordered" radius="md" className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white" onPress={onClose}>
+            <X size={16} color="#8A7D72" />
           </Button>
         </DrawerHeader>
 

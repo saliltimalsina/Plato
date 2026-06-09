@@ -9,7 +9,7 @@ import {
 import {
   ArrowLeft, Phone, Send, FileText, Plus, MoreHorizontal, Link as LinkIcon,
   DollarSign, RotateCcw, ArrowDown, ArrowUp, LucideIcon, CreditCard, SlidersHorizontal,
-  Pencil, Percent, Trash2, Paperclip, Inbox,
+  Pencil, Percent, Trash2, Paperclip, Inbox, X,
 } from "lucide-react";
 import { Avatar, ORANGE } from "@/components/rms/primitives";
 import {
@@ -354,12 +354,17 @@ function TxnDetailDrawer({
       isOpen onClose={onClose} placement="right" size="md"
       classNames={{
         base: "sm:max-w-[440px]",
-        closeButton: "top-[14px] right-[14px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100 z-10",
+        closeButton: "hidden",
       }}
     >
       <DrawerContent>
-        <DrawerHeader className="border-b border-warm-200 pr-[52px]">
-          <span className="text-[18px] font-extrabold text-ink tracking-[-0.02em]">Transaction Details</span>
+        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200">
+          <span className="flex-1 text-[18px] font-extrabold text-ink tracking-[-0.02em]">Transaction Details</span>
+          <Button isIconOnly size="sm" variant="bordered" radius="md"
+            className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white"
+            onPress={onClose}>
+            <X size={16} color="#8A7D72" />
+          </Button>
         </DrawerHeader>
 
         <DrawerBody className="px-5 gap-[18px]">

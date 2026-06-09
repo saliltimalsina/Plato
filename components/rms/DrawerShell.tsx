@@ -1,6 +1,7 @@
 "use client";
 
-import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, Button } from "@heroui/react";
+import { X } from "lucide-react";
 
 interface Props {
   header: React.ReactNode;
@@ -19,11 +20,18 @@ export function DrawerShell({ header, children, footer, onClose, size = "sm" }: 
       size={size}
       classNames={{
         base: size === "sm" ? "sm:max-w-[460px]" : undefined,
-        closeButton: "top-[14px] right-[14px] w-8 h-8 rounded-[9px] border border-[#EFEAE6] bg-white text-warm-500 hover:bg-warm-100 z-10",
+        closeButton: "hidden",
       }}
     >
       <DrawerContent>
-        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200 pr-[52px]">{header}</DrawerHeader>
+        <DrawerHeader className="flex items-center gap-2 border-b border-warm-200">
+          <div className="flex-1 min-w-0 flex items-center gap-2">{header}</div>
+          <Button isIconOnly size="sm" variant="bordered" radius="md"
+            className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white"
+            onPress={onClose}>
+            <X size={16} color="#8A7D72" />
+          </Button>
+        </DrawerHeader>
         <DrawerBody className="px-5">{children}</DrawerBody>
         {footer && <DrawerFooter className="border-t border-warm-200 bg-warm-50">{footer}</DrawerFooter>}
       </DrawerContent>

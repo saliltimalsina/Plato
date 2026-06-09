@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import {
   Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Input,
 } from "@heroui/react";
-import { ScrollText, ChevronDown, Search, ArrowUp, ArrowDown } from "lucide-react";
-import { PageHeader, KpiData, KpiRow, ORANGE, GroupChip } from "@/components/rms/primitives";
+import { ChevronDown, Search, ArrowUp, ArrowDown } from "lucide-react";
+import { PageHeader, GroupChip } from "@/components/rms/primitives";
 import { GROUP_COLOR } from "@/components/stock/data";
 import {
   StockHistoryRow, STOCK_HISTORY, MovementType,
@@ -59,12 +59,6 @@ export default function StockHistoryPage() {
     });
   }, [search, staff, type, stockItem, group]);
 
-  const kpis: KpiData[] = [
-    { key: "moves", icon: ScrollText, tint: "#FDECE4", accent: ORANGE,
-      label: "Total Movements", value: filtered.length, sub: "entries",
-      sparkData: [3, 4, 4, 5, 5, 6, 6, 6, 7, 7, 7, filtered.length] },
-  ];
-
   const COLS = "44px 1.2fr 1fr 0.9fr 1.1fr 1.1fr 0.7fr 0.5fr 0.5fr 0.7fr 0.8fr 0.8fr 0.8fr";
 
   return (
@@ -80,8 +74,6 @@ export default function StockHistoryPage() {
           </div>
         }
       />
-
-      <KpiRow kpis={kpis} />
 
       {/* mobile search */}
       <div className="flex lg:hidden">

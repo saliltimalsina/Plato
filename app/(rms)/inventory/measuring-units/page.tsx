@@ -5,12 +5,11 @@ import {
   Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem,
   Input, Textarea,
 } from "@heroui/react";
-import { Ruler, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { ListScaffold } from "@/components/rms/ListScaffold";
 import {
   ModalShell, ModalFooterButtons, DeleteModal, labelCx, wrapCx, inputCx,
 } from "@/components/rms/ModalShell";
-import { KpiData } from "@/components/rms/primitives";
 import { useListState } from "@/components/rms/useListState";
 import { MeasuringUnit, MEASURING_UNITS } from "@/components/rms/data/inventory";
 
@@ -94,10 +93,6 @@ export default function MeasuringUnitsPage() {
     sortAccessors: { name: (u) => u.name.toLowerCase(), symbol: (u) => u.symbol.toLowerCase() },
   });
 
-  const kpis: KpiData[] = [
-    { key: "units", icon: Ruler, tint: "#E3F6F1", accent: "#1FA98B", label: "Total Units", value: s.items.length, sub: "units", delta: "+1", deltaUp: true, sparkData: [2, 2, 3, 3, 4, 4, 5, 5, 5, 6, 6, s.items.length] },
-  ];
-
   const renderCell = (u: MeasuringUnit, key: string) => {
     switch (key) {
       case "sn": return <span className="font-mono text-[12.5px] text-warm-500">{u.id}</span>;
@@ -154,7 +149,6 @@ export default function MeasuringUnitsPage() {
       <ListScaffold
         state={s}
         title="Measuring Unit"
-        kpis={kpis}
         totalCount={s.items.length}
         columns={COLUMNS}
         renderCell={renderCell}

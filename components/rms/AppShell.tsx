@@ -129,8 +129,8 @@ function NavRow({ it, pathname }: { it: NavItem; pathname: string }) {
           {it.children.map((c) => {
             const on = isActive(pathname, c.href);
             return (
-              <Link key={c.href} href={c.href} className="flex items-center gap-[9px] pl-3 pr-[10px] py-[6px] ml-1" style={{ borderLeft: "1.5px solid #ECE3DC" }}>
-                <div className="rounded-[7px] px-[9px] py-1 flex-1" style={{ background: on ? "#FFF1EB" : "transparent" }}>
+              <Link key={c.href} href={c.href} className="flex items-center gap-[9px] pl-3 pr-[10px] py-[2px] ml-1" style={{ borderLeft: "1.5px solid #ECE3DC" }}>
+                <div className="rounded-[7px] px-[9px] py-[5px] flex-1" style={{ background: on ? "#FFF1EB" : "transparent" }}>
                   <span className="text-[12.5px] whitespace-nowrap" style={{ fontWeight: on ? 700 : 500, color: on ? ORANGE : "#7A6E63" }}>{c.label}</span>
                 </div>
               </Link>

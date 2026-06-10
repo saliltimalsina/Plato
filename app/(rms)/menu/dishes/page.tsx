@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Switch,
   Drawer, DrawerContent, DrawerHeader, DrawerBody, Tabs, Tab, Select, SelectItem,
@@ -17,7 +18,9 @@ import {
   Dish, DishVariant, DISHES, DISH_TYPE_COLOR, priceLabel, DishType,
 } from "@/components/rms/data/menu";
 
-const DISH_TYPES: ("All" | DishType)[] = ["All", "Veg", "Non-Veg", "Egg", "Vegan"];
+const DISH_TYPE_FILTERS: ("All" | DishType)[] = [
+  "All", "Veg", "Non-Veg", "Egg", "Vegan", "Spicy", "Halal", "Sugar Free", "Gluten Free",
+];
 
 const COLUMNS = [
   { key: "sn",        label: "SN" },
@@ -33,6 +36,7 @@ const COLUMNS = [
 ];
 
 export default function DishesPage() {
+  const router = useRouter();
   const [typeFilter, setTypeFilter] = useState<"All" | DishType>("All");
   const [viewing, setViewing] = useState<Dish | null>(null);
 
@@ -172,7 +176,7 @@ export default function DishesPage() {
         size="sm" variant="bordered" radius="md"
         classNames={{ label: labelCx, trigger: wrapCx, value: inputCx }}
       >
-        {DISH_TYPES.map((t) => <SelectItem key={t}>{t}</SelectItem>)}
+        {DISH_TYPE_FILTERS.map((t) => <SelectItem key={t}>{t}</SelectItem>)}
       </Select>
     </div>
   );
@@ -190,7 +194,7 @@ export default function DishesPage() {
         onRowOpen={(d) => setViewing(d)}
         searchPlaceholder="Search dishes…"
         addLabel="Add New"
-        onAdd={() => s.setEditing(null)}
+        onAdd={() => router.push("/menu/dishes/new")}
         filterContent={filterContent}
         filterCount={typeFilter === "All" ? 0 : 1}
       />

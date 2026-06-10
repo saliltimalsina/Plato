@@ -1,6 +1,9 @@
 // Menu module shared data: dishes, categories, sub-menus, menu sets, addons, combo offers.
 
-export type DishType = "Veg" | "Non-Veg" | "Egg" | "Vegan" | "-";
+export type DishType =
+  | "Veg" | "Non-Veg" | "Egg" | "Vegan"
+  | "Spicy" | "Halal" | "Sugar Free" | "Gluten Free"
+  | "-";
 
 export interface DishVariant {
   id: number;
@@ -200,12 +203,20 @@ export const DISHES: Dish[] = [
 ];
 
 export const DISH_TYPE_COLOR: Record<DishType, string> = {
-  "Veg":     "#16A34A",
-  "Non-Veg": "#E5484D",
-  "Egg":     "#F59E0B",
-  "Vegan":   "#1FA98B",
-  "-":       "#B7A99E",
+  "Veg":         "#16A34A",
+  "Non-Veg":     "#E5484D",
+  "Egg":         "#F59E0B",
+  "Vegan":       "#1FA98B",
+  "Spicy":       "#E5484D",
+  "Halal":       "#0EA5E9",
+  "Sugar Free":  "#0EA5E9",
+  "Gluten Free": "#9B51E0",
+  "-":           "#B7A99E",
 };
+
+export const DISH_TYPES: DishType[] = [
+  "Veg", "Non-Veg", "Egg", "Vegan", "Spicy", "Halal", "Sugar Free", "Gluten Free",
+];
 
 /* helpers */
 export function priceLabel(d: Dish): string {

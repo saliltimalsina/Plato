@@ -9,9 +9,11 @@ import {
   ArrowLeft, ChevronRight, Search, Settings2, MoreHorizontal, Pencil, Trash2, ChevronDown, Plus,
 } from "lucide-react";
 import { DataTable } from "@/components/rms/DataTable";
+import { DeleteModal } from "@/components/rms/ModalShell";
 import { Badge, ORANGE } from "@/components/rms/primitives";
 import { useListState } from "@/components/rms/useListState";
 import { CATEGORIES, DISHES, Dish, DISH_TYPE_COLOR, priceLabel } from "@/components/rms/data/menu";
+import { DishDetailDrawer } from "@/components/menu/DishDetailDrawer";
 
 const COLUMNS = [
   { key: "sn",        label: "SN" },
@@ -30,6 +32,7 @@ export default function CategoryDishesPage() {
   const params = useParams();
   const id = Number(params.id);
   const category = CATEGORIES.find((c) => c.id === id);
+  const [viewing, setViewing] = useState<Dish | null>(null);
 
   const dishesInCategory = useMemo(
     () => DISHES.filter((d) => d.category === category?.name),
@@ -46,6 +49,8 @@ export default function CategoryDishesPage() {
     },
   });
 
+  const toggleAvailable = (d: Dish, on: boolean) => s.save({ ...d, available: on });
+
   if (!category) {
     return (
       <div className="bg-white border border-[#EEEAE6] rounded-2xl p-6 text-center">
@@ -61,10 +66,11 @@ export default function CategoryDishesPage() {
     switch (key) {
       case "sn":       return <span className="font-mono text-[12.5px] text-warm-500">{d.id}</span>;
       case "name":     return (
-        <div className="inline-flex items-center gap-2">
+        <button onClick={() => setViewing(d)}
+          className="inline-flex items-center gap-2 text-left hover:text-[#F15022] transition-colors">
           <span className="w-7 h-7 rounded-[8px] bg-warm-100 flex items-center justify-center text-[14px] flex-shrink-0">{d.emoji}</span>
           <span className="text-[13.5px] font-semibold text-ink whitespace-nowrap">{d.name}</span>
-        </div>
+        </button>
       );
       case "price":    return <span className="text-[13px] font-bold tnum" style={{ color: "#15803D" }}>{priceLabel(d)}</span>;
       case "category": return <span className="text-[13px] text-warm-700">{d.category}</span>;
@@ -75,6 +81,7 @@ export default function CategoryDishesPage() {
       case "kotType":  return <span className="text-[13px] text-warm-700">{d.kotType ?? <span className="text-warm-400">—</span>}</span>;
       case "available": return (
         <Switch isSelected={d.available} size="sm"
+          onValueChange={(v) => toggleAvailable(d, v)}
           classNames={{ wrapper: "group-data-[selected=true]:bg-[#F15022]" }}
           aria-label="Available" />
       );
@@ -86,9 +93,13 @@ export default function CategoryDishesPage() {
             </Button>
           </DropdownTrigger>
           <DropdownMenu aria-label="Row actions">
-            <DropdownItem key="edit" startContent={<Pencil size={15} color="#8A7D72" />}>Edit</DropdownItem>
+            <DropdownItem key="view"  startContent={<Pencil size={15} color="#8A7D72" />} onPress={() => setViewing(d)}>View</DropdownItem>
+            <DropdownItem key="edit"  startContent={<Pencil size={15} color="#8A7D72" />} onPress={() => s.setEditing(d)}>Edit</DropdownItem>
             <DropdownItem key="del" className="text-[#F15022]" color="danger"
-              startContent={<Trash2 size={15} color="#F15022" />}>Move to trash</DropdownItem>
+              startContent={<Trash2 size={15} color="#F15022" />}
+              onPress={() => s.setDel({ item: d })}>
+              Move to trash
+            </DropdownItem>
           </DropdownMenu>
         </Dropdown>
       );
@@ -97,7 +108,8 @@ export default function CategoryDishesPage() {
   };
 
   const renderCard = (d: Dish) => (
-    <div className="bg-white border border-[#EEEAE6] rounded-2xl p-[14px]">
+    <div className="bg-white border border-[#EEEAE6] rounded-2xl p-[14px] cursor-pointer active:bg-warm-50"
+      onClick={() => setViewing(d)}>
       <div className="flex items-start gap-3">
         <span className="w-10 h-10 rounded-[10px] bg-warm-100 flex items-center justify-center text-[18px] flex-shrink-0">{d.emoji}</span>
         <div className="flex-1 min-w-0">
@@ -156,9 +168,29 @@ export default function CategoryDishesPage() {
         renderCell={renderCell}
         renderCard={renderCard}
         selectable
+        onRowOpen={(d) => setViewing(d)}
         emptyTitle="No dishes in this category"
         emptyHint="Add a new dish and assign it to this category."
       />
+
+      {s.del && (
+        <DeleteModal
+          label={"item" in s.del ? `"${s.del.item.name}"` : `${s.selected.length} dishes`}
+          onClose={() => s.setDel(null)}
+          onConfirm={() => s.doDelete((d) => `"${d.name}"`)}
+        />
+      )}
+
+      {viewing && (
+        <DishDetailDrawer
+          dish={viewing}
+          onClose={() => setViewing(null)}
+          onDelete={() => { s.setDel({ item: viewing }); setViewing(null); }}
+          onEdit={() => { s.setEditing(viewing); setViewing(null); }}
+          onToggle={(v) => toggleAvailable(viewing, v)}
+          onToggleRecommended={(v) => s.save({ ...viewing, recommended: v })}
+        />
+      )}
     </>
   );
 }

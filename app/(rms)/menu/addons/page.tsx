@@ -7,7 +7,7 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerBody,
 } from "@heroui/react";
 import {
-  MoreHorizontal, Pencil, Trash2, Box, UploadCloud, X, Heart, Layers,
+  MoreHorizontal, Pencil, Trash2, Box, UploadCloud, X, Heart, Layers, Search, Check,
 } from "lucide-react";
 import { ListScaffold } from "@/components/rms/ListScaffold";
 import {
@@ -15,7 +15,7 @@ import {
 } from "@/components/rms/ModalShell";
 import { KpiData, ORANGE } from "@/components/rms/primitives";
 import { useListState } from "@/components/rms/useListState";
-import { Addon, ADDONS } from "@/components/rms/data/menu";
+import { Addon, ADDONS, DISHES, Dish, priceLabel } from "@/components/rms/data/menu";
 
 const Req = () => <span className="text-[#F15022] ml-[2px]">*</span>;
 
@@ -157,6 +157,10 @@ function AddonModal({
   );
 }
 
+/* derive initial dishes-assigned for an add-on from its `used` count */
+const initialAssignedFor = (addon: Addon) =>
+  DISHES.slice(0, Math.min(addon.used ?? 0, DISHES.length)).map((d) => d.id);
+
 /* ── detail drawer ─────────────────────────────────────────────── */
 function AddonDrawer({
   addon, onClose, onEdit, onDelete, onToggle,
@@ -167,6 +171,12 @@ function AddonDrawer({
   onDelete: () => void;
   onToggle: (v: boolean) => void;
 }) {
+  const [assignedIds, setAssignedIds] = useState<number[]>(() => initialAssignedFor(addon));
+  const [assignOpen, setAssignOpen] = useState(false);
+  const assigned = useMemo(
+    () => assignedIds.map((id) => DISHES.find((d) => d.id === id)).filter(Boolean) as Dish[],
+    [assignedIds],
+  );
   return (
     <Drawer isOpen onClose={onClose} placement="right" size="md"
       classNames={{ base: "sm:max-w-[480px]", closeButton: "hidden" }}>
@@ -206,7 +216,7 @@ function AddonDrawer({
         <DrawerBody className="px-5 gap-[14px]">
           <div>
             <span className="inline-flex items-center px-[10px] py-[5px] rounded-md text-[11.5px] font-semibold bg-warm-100 text-warm-700">
-              Used In: <span className="ml-1 font-bold text-ink">{addon.used ?? 0} Dishes</span>
+              Used In: <span className="ml-1 font-bold text-ink">{assigned.length} Dishes</span>
             </span>
           </div>
 
@@ -233,24 +243,182 @@ function AddonDrawer({
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[13px] font-extrabold text-ink">Dish Using This Add-Ons</h3>
               <Button size="sm" variant="bordered" radius="md"
-                className="h-8 border border-[#E6E1DC] bg-white text-warm-700 text-[12px] font-semibold">
+                className="h-8 border border-[#E6E1DC] bg-white text-warm-700 text-[12px] font-semibold"
+                onPress={() => setAssignOpen(true)}>
                 Assign More
               </Button>
             </div>
             <div className="border border-warm-200 rounded-[12px] overflow-hidden">
               <div className="grid bg-cream border-b border-warm-200 px-3 py-2 text-[10.5px] font-bold text-warm-500 uppercase tracking-[0.04em]"
-                style={{ gridTemplateColumns: "60px 1fr 100px" }}>
-                <span>SN</span><span>Dish Name</span><span className="text-right">Price</span>
+                style={{ gridTemplateColumns: "60px 1fr 110px 36px" }}>
+                <span>SN</span><span>Dish Name</span><span className="text-right">Price</span><span />
               </div>
-              <div className="py-[28px] flex flex-col items-center gap-2">
-                <div className="w-[44px] h-[44px] rounded-[12px] bg-warm-100 flex items-center justify-center">
-                  <Box size={20} color="#C9BCB0" />
+              {assigned.length === 0 ? (
+                <div className="py-[28px] flex flex-col items-center gap-2">
+                  <div className="w-[44px] h-[44px] rounded-[12px] bg-warm-100 flex items-center justify-center">
+                    <Box size={20} color="#C9BCB0" />
+                  </div>
+                  <span className="text-[13px] font-bold text-ink">No Dishes Found!</span>
                 </div>
-                <span className="text-[13px] font-bold text-ink">No Dishes Found!</span>
-              </div>
+              ) : (
+                assigned.map((d, i) => (
+                  <div key={d.id} className="grid items-center px-3 py-[10px]"
+                    style={{ gridTemplateColumns: "60px 1fr 110px 36px", borderTop: i === 0 ? "none" : "1px solid #F4EFEB" }}>
+                    <span className="font-mono text-[12px] text-warm-500">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="inline-flex items-center gap-2 min-w-0">
+                      <span className="w-7 h-7 rounded-[8px] bg-warm-100 flex items-center justify-center text-[14px] flex-shrink-0">{d.emoji}</span>
+                      <span className="text-[13px] font-semibold text-ink truncate">{d.name}</span>
+                    </span>
+                    <span className="text-[13px] font-bold text-right tnum" style={{ color: "#15803D" }}>{priceLabel(d)}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${d.name}`}
+                      onClick={() => setAssignedIds((prev) => prev.filter((id) => id !== d.id))}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-warm-500 hover:bg-warm-100"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </DrawerBody>
+      </DrawerContent>
+      {assignOpen && (
+        <AssignDishesDrawer
+          assignedIds={assignedIds}
+          onClose={() => setAssignOpen(false)}
+          onConfirm={(ids) => { setAssignedIds(ids); setAssignOpen(false); }}
+        />
+      )}
+    </Drawer>
+  );
+}
+
+/* ── Assign More side drawer ───────────────────────────────────── */
+function AssignDishesDrawer({
+  assignedIds, onClose, onConfirm,
+}: {
+  assignedIds: number[];
+  onClose: () => void;
+  onConfirm: (ids: number[]) => void;
+}) {
+  const [picked, setPicked] = useState<number[]>(assignedIds);
+  const [q, setQ] = useState("");
+  const list = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return DISHES.filter((d) => !term || d.name.toLowerCase().includes(term));
+  }, [q]);
+  const toggle = (id: number) =>
+    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const allSel = list.length > 0 && list.every((d) => picked.includes(d.id));
+  const toggleAll = () =>
+    setPicked((p) => allSel
+      ? p.filter((id) => !list.some((d) => d.id === id))
+      : [...new Set([...p, ...list.map((d) => d.id)])]);
+  const dirty = picked.length !== assignedIds.length ||
+    picked.some((id) => !assignedIds.includes(id));
+
+  return (
+    <Drawer isOpen onClose={onClose} placement="right" size="sm"
+      classNames={{ base: "sm:max-w-[420px]", closeButton: "hidden" }}>
+      <DrawerContent>
+        <DrawerHeader className="flex-col items-stretch gap-2 border-b border-warm-200">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-[16px] font-extrabold text-ink tracking-[-0.02em]">Assign More Dishes</h3>
+            <Button isIconOnly size="sm" variant="bordered" radius="md"
+              className="w-[34px] h-[34px] min-w-[34px] border border-[#E6E1DC] bg-white" onPress={onClose}>
+              <X size={16} color="#8A7D72" />
+            </Button>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[12px] font-bold text-warm-500">Others</span>
+            <Input
+              size="sm" radius="md" placeholder="Search"
+              value={q} onValueChange={setQ}
+              startContent={<Search size={14} color="#B0A69E" />}
+              classNames={{ base: "w-[180px]", inputWrapper: "bg-white border border-[#E6E1DC] h-8 shadow-none" }}
+            />
+          </div>
+        </DrawerHeader>
+
+        <DrawerBody className="px-0 py-0">
+          <div className="grid items-center px-3 py-[10px] bg-cream border-b border-warm-200 text-[10.5px] font-bold text-warm-500 uppercase tracking-[0.04em]"
+            style={{ gridTemplateColumns: "32px 40px 1fr 110px" }}>
+            <button
+              type="button"
+              aria-label="Toggle all"
+              onClick={toggleAll}
+              className="w-[18px] h-[18px] rounded-[5px] flex items-center justify-center"
+              style={{
+                border: allSel ? `1px solid ${ORANGE}` : "1px solid #C9BCB0",
+                background: allSel ? ORANGE : "#fff",
+              }}
+            >
+              {allSel && <Check size={12} color="#fff" strokeWidth={3} />}
+            </button>
+            <span>SN</span><span>Dish Name</span><span className="text-right">Price</span>
+          </div>
+          {list.map((d, i) => {
+            const on = picked.includes(d.id);
+            return (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => toggle(d.id)}
+                className="grid items-center px-3 py-[10px] hover:bg-warm-50 text-left w-full"
+                style={{
+                  gridTemplateColumns: "32px 40px 1fr 110px",
+                  borderBottom: "1px solid #F4EFEB",
+                }}
+              >
+                <span
+                  className="w-[18px] h-[18px] rounded-[5px] flex items-center justify-center"
+                  style={{
+                    border: on ? `1px solid ${ORANGE}` : "1px solid #C9BCB0",
+                    background: on ? ORANGE : "#fff",
+                  }}
+                >
+                  {on && <Check size={12} color="#fff" strokeWidth={3} />}
+                </span>
+                <span className="font-mono text-[12px] text-warm-500">{String(i + 1).padStart(2, "0")}</span>
+                <span className="inline-flex items-center gap-2 min-w-0">
+                  <span className="w-7 h-7 rounded-[8px] bg-warm-100 flex items-center justify-center text-[14px] flex-shrink-0">{d.emoji}</span>
+                  <span className="text-[13px] font-semibold text-ink truncate">{d.name}</span>
+                </span>
+                <span className="text-[13px] font-bold text-right tnum" style={{ color: "#15803D" }}>{priceLabel(d)}</span>
+              </button>
+            );
+          })}
+          {list.length === 0 && (
+            <div className="py-[28px] flex flex-col items-center gap-2">
+              <div className="w-[44px] h-[44px] rounded-[12px] bg-warm-100 flex items-center justify-center">
+                <Box size={20} color="#C9BCB0" />
+              </div>
+              <span className="text-[13px] font-bold text-ink">No dishes match.</span>
+            </div>
+          )}
+        </DrawerBody>
+
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-warm-200 bg-warm-50">
+          <Button variant="light" radius="md" className="font-semibold text-warm-600" onPress={() => setPicked(assignedIds)}>
+            Reset
+          </Button>
+          <Button
+            radius="md"
+            isDisabled={!dirty}
+            className="font-bold disabled:opacity-100"
+            style={{
+              background: dirty ? ORANGE : "#EFE8E2",
+              color: dirty ? "#fff" : "#B7A99E",
+              boxShadow: dirty ? "0 2px 8px rgba(241,80,34,0.32)" : "none",
+            }}
+            onPress={() => onConfirm(picked)}
+          >
+            Assign Dishes
+          </Button>
+        </div>
       </DrawerContent>
     </Drawer>
   );

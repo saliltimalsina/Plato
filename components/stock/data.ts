@@ -14,7 +14,7 @@ export interface StockItem {
   id: number;
   name: string;
   emoji: string;
-  groups: StockGroup[];
+  groups: string[];
   rate: string;
   rateNum: number;
   unit: Unit;
@@ -37,7 +37,7 @@ export const ITEMS: StockItem[] = [
   { id: 9, name: "Basmati Rice",   emoji: "🍚", groups: ["Pantry"],             rate: "Rs 180",   rateNum: 180,  unit: "kg",  opening: 50,  closing: 42,   value: "Rs 7,560",  valueNum: 7560,  supplier: "Annapurna Grains" },
 ];
 
-export const ALL_GROUPS: StockGroup[] = [
+export const ALL_GROUPS: string[] = [
   "Vegetable", "Meat", "Drinks", "Beverage", "Dairy", "Pantry",
 ];
 

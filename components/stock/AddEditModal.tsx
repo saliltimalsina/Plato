@@ -5,9 +5,12 @@ import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Input, NumberInput, Select, SelectItem, Button,
 } from "@heroui/react";
+import { Plus } from "lucide-react";
 import {
-  ALL_GROUPS, UNITS, GROUP_COLOR, ORANGE, StockItem, Unit, StockGroup,
+  ALL_GROUPS, UNITS, GROUP_COLOR, ORANGE, StockItem, Unit,
 } from "./data";
+import { GroupModal } from "./GroupModal";
+import { STOCK_GROUPS, StockGroupRow } from "@/components/rms/data/inventory";
 
 interface Props {
   item: StockItem | null; // null = new
@@ -18,7 +21,7 @@ interface Props {
 interface FormState {
   name: string;
   emoji: string;
-  groups: StockGroup[];
+  groups: string[];
   unit: Unit;
   opening: number | "";
   closing: number | "";
@@ -39,9 +42,23 @@ export function AddEditModal({ item, onClose, onSave }: Props) {
   );
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((p) => ({ ...p, [k]: v }));
-  const toggleGroup = (g: StockGroup) =>
+  const toggleGroup = (g: string) =>
     setF((p) => ({ ...p, groups: p.groups.includes(g) ? p.groups.filter((x) => x !== g) : [...p.groups, g] }));
   const valid = f.name.trim().length > 0;
+
+  const [openGroupModal, setOpenGroupModal] = useState(false);
+  const onSaveNewGroup = (g: StockGroupRow) => {
+    const name = g.name.trim();
+    if (!name) return;
+    if (!ALL_GROUPS.includes(name)) ALL_GROUPS.push(name);
+    GROUP_COLOR[name] = g.color;
+    if (!STOCK_GROUPS.some((x) => x.name.toLowerCase() === name.toLowerCase())) {
+      const nid = Math.max(0, ...STOCK_GROUPS.map((x) => x.id)) + 1;
+      STOCK_GROUPS.push({ id: nid, name, color: g.color, itemCount: 0, description: g.description });
+    }
+    setF((p) => ({ ...p, groups: p.groups.includes(name) ? p.groups : [...p.groups, name] }));
+    setOpenGroupModal(false);
+  };
 
   const submit = () => {
     if (!valid) return;
@@ -111,7 +128,7 @@ export function AddEditModal({ item, onClose, onSave }: Props) {
             <div className="flex flex-wrap gap-[6px]">
               {ALL_GROUPS.map((g) => {
                 const on = f.groups.includes(g);
-                const c = GROUP_COLOR[g];
+                const c = GROUP_COLOR[g] ?? "#8A7D72";
                 return (
                   <button
                     key={g}
@@ -129,6 +146,15 @@ export function AddEditModal({ item, onClose, onSave }: Props) {
                   </button>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => setOpenGroupModal(true)}
+                className="inline-flex items-center gap-[5px] px-[11px] py-[5px] rounded-full text-[12.5px] font-semibold border border-dashed"
+                style={{ borderColor: ORANGE, color: ORANGE, background: "#fff" }}
+              >
+                <Plus size={13} strokeWidth={2.4} />
+                Add Stock Group
+              </button>
             </div>
           </div>
 
@@ -215,6 +241,9 @@ export function AddEditModal({ item, onClose, onSave }: Props) {
           </Button>
         </ModalFooter>
       </ModalContent>
+      {openGroupModal && (
+        <GroupModal group={null} onClose={() => setOpenGroupModal(false)} onSave={onSaveNewGroup} />
+      )}
     </Modal>
   );
 }

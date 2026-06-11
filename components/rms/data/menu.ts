@@ -260,25 +260,26 @@ export const CATEGORIES: Category[] = [
 export interface SubMenu {
   id: number;
   name: string;
+  emoji: string;
   dishCount: number;
   description?: string;
 }
 export const SUB_MENUS: SubMenu[] = [
-  { id: 1,  name: "Food Menu",        dishCount: 24, description: "Main food service menu — lunch + dinner mains." },
-  { id: 2,  name: "Cafe Menu",        dishCount: 14, description: "Coffee bar, espresso drinks and bottled beverages." },
-  { id: 3,  name: "Bar Menu",         dishCount: 18, description: "Cocktails, beer and shareable bar snacks." },
-  { id: 4,  name: "Kids Menu",        dishCount: 8,  description: "Smaller portions and milder spice for young guests." },
-  { id: 5,  name: "Weekend Brunch",   dishCount: 12, description: "Saturday + Sunday 9am – 1pm brunch specials." },
-  { id: 6,  name: "Breakfast Menu",   dishCount: 11, description: "Weekday breakfast — 7am to 11am, eggs & toast plates." },
-  { id: 7,  name: "Late Night Menu",  dishCount: 9,  description: "11pm – 2am limited menu for late-night service." },
-  { id: 8,  name: "Banquet Menu",     dishCount: 22, description: "Private events, weddings, large-format catering." },
-  { id: 9,  name: "Vegan Menu",       dishCount: 13, description: "Fully plant-based mains, sides and desserts." },
-  { id: 10, name: "Gluten-Free Menu", dishCount: 7,  description: "Certified gluten-free kitchen-station offerings." },
-  { id: 11, name: "Express Lunch",    dishCount: 6,  description: "15-minute prep guarantee for the lunch rush." },
-  { id: 12, name: "Tasting Menu",     dishCount: 8,  description: "Chef-curated 7-course tasting — Thu–Sat dinner only." },
-  { id: 13, name: "Dessert Menu",     dishCount: 10, description: "House-made cakes, pastries, ice creams and pairings." },
-  { id: 14, name: "Wine List",        dishCount: 32, description: "Curated reds, whites, rosé and sparkling by the glass and bottle." },
-  { id: 15, name: "Mocktail Menu",    dishCount: 9,  description: "Zero-proof cocktails and craft mixers." },
+  { id: 1,  name: "Food Menu",        emoji: "🍜", dishCount: 24, description: "Main food service menu — lunch + dinner mains." },
+  { id: 2,  name: "Cafe Menu",        emoji: "☕", dishCount: 14, description: "Coffee bar, espresso drinks and bottled beverages." },
+  { id: 3,  name: "Bar Menu",         emoji: "🍹", dishCount: 18, description: "Cocktails, beer and shareable bar snacks." },
+  { id: 4,  name: "Kids Menu",        emoji: "🧒", dishCount: 8,  description: "Smaller portions and milder spice for young guests." },
+  { id: 5,  name: "Weekend Brunch",   emoji: "🥞", dishCount: 12, description: "Saturday + Sunday 9am – 1pm brunch specials." },
+  { id: 6,  name: "Breakfast Menu",   emoji: "🍳", dishCount: 11, description: "Weekday breakfast — 7am to 11am, eggs & toast plates." },
+  { id: 7,  name: "Late Night Menu",  emoji: "🌙", dishCount: 9,  description: "11pm – 2am limited menu for late-night service." },
+  { id: 8,  name: "Banquet Menu",     emoji: "🎉", dishCount: 22, description: "Private events, weddings, large-format catering." },
+  { id: 9,  name: "Vegan Menu",       emoji: "🥬", dishCount: 13, description: "Fully plant-based mains, sides and desserts." },
+  { id: 10, name: "Gluten-Free Menu", emoji: "🌾", dishCount: 7,  description: "Certified gluten-free kitchen-station offerings." },
+  { id: 11, name: "Express Lunch",    emoji: "⚡", dishCount: 6,  description: "15-minute prep guarantee for the lunch rush." },
+  { id: 12, name: "Tasting Menu",     emoji: "🍽️", dishCount: 8,  description: "Chef-curated 7-course tasting — Thu–Sat dinner only." },
+  { id: 13, name: "Dessert Menu",     emoji: "🍰", dishCount: 10, description: "House-made cakes, pastries, ice creams and pairings." },
+  { id: 14, name: "Wine List",        emoji: "🍷", dishCount: 32, description: "Curated reds, whites, rosé and sparkling by the glass and bottle." },
+  { id: 15, name: "Mocktail Menu",    emoji: "🧊", dishCount: 9,  description: "Zero-proof cocktails and craft mixers." },
 ];
 
 /* ── menu sets ────────────────────────────────────────────────── */

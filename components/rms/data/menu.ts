@@ -214,9 +214,21 @@ export const DISH_TYPE_COLOR: Record<DishType, string> = {
   "-":           "#B7A99E",
 };
 
-export const DISH_TYPES: DishType[] = [
+export type DishTypeChoice = Exclude<DishType, "-">;
+export const DISH_TYPES: DishTypeChoice[] = [
   "Veg", "Non-Veg", "Egg", "Vegan", "Spicy", "Halal", "Sugar Free", "Gluten Free",
 ];
+
+export const DISH_TYPE_EMOJI: Record<Exclude<DishType, "-">, string> = {
+  "Veg":         "🟢",
+  "Non-Veg":     "🔴",
+  "Egg":         "🥚",
+  "Vegan":       "🌱",
+  "Spicy":       "🌶️",
+  "Halal":       "☪️",
+  "Sugar Free":  "🩵",
+  "Gluten Free": "🌾",
+};
 
 /* helpers */
 export function priceLabel(d: Dish): string {
@@ -230,17 +242,18 @@ export function priceLabel(d: Dish): string {
 export interface Category {
   id: number;
   name: string;
+  emoji: string;
   dishCount: number;
   description?: string;
 }
 export const CATEGORIES: Category[] = [
-  { id: 1, name: "Lunch",     dishCount: 2, description: "Mid-day mains served 11am – 3pm; quick service portions." },
-  { id: 2, name: "Beverages", dishCount: 4, description: "Hot coffees, iced drinks, sodas and bottled water." },
-  { id: 3, name: "Breakfast", dishCount: 3, description: "Morning plates and platters available 7am – 11am." },
-  { id: 4, name: "Dinner",    dishCount: 5, description: "Evening dine-in service with chef specials." },
-  { id: 5, name: "Desserts",  dishCount: 4, description: "Cakes, pastries and house-made ice creams." },
-  { id: 6, name: "Snacks",    dishCount: 6, description: "Light bites and small plates for any hour." },
-  { id: 7, name: "Soups",     dishCount: 3, description: "Daily soups, broths and starters." },
+  { id: 1, name: "Lunch",     emoji: "🍱", dishCount: 2, description: "Mid-day mains served 11am – 3pm; quick service portions." },
+  { id: 2, name: "Beverages", emoji: "🥤", dishCount: 4, description: "Hot coffees, iced drinks, sodas and bottled water." },
+  { id: 3, name: "Breakfast", emoji: "🍳", dishCount: 3, description: "Morning plates and platters available 7am – 11am." },
+  { id: 4, name: "Dinner",    emoji: "🍽️", dishCount: 5, description: "Evening dine-in service with chef specials." },
+  { id: 5, name: "Desserts",  emoji: "🍰", dishCount: 4, description: "Cakes, pastries and house-made ice creams." },
+  { id: 6, name: "Snacks",    emoji: "🥨", dishCount: 6, description: "Light bites and small plates for any hour." },
+  { id: 7, name: "Soups",     emoji: "🍲", dishCount: 3, description: "Daily soups, broths and starters." },
 ];
 
 /* ── sub-menus ────────────────────────────────────────────────── */
@@ -278,21 +291,28 @@ export interface Addon {
   id: number;
   name: string;
   price: number;
+  emoji?: string;
   category?: string;
+  type?: string;         // e.g. "Veg", "Non-Veg", "Uncategorized"
+  cogs?: number;
+  discount?: number;
+  used?: number;         // # of dishes using this add-on
+  available: boolean;
+  description?: string;
 }
 export const ADDONS: Addon[] = [
-  { id: 1, name: "Extra Cheese",       price: 50,  category: "Topping" },
-  { id: 2, name: "Garlic Bread",       price: 90,  category: "Side" },
-  { id: 3, name: "Bacon Strips",       price: 120, category: "Topping" },
-  { id: 4, name: "Jalapeños",          price: 35,  category: "Topping" },
-  { id: 5, name: "French Fries",       price: 110, category: "Side" },
-  { id: 6, name: "Onion Rings",        price: 130, category: "Side" },
-  { id: 7, name: "Mushroom Sauté",     price: 80,  category: "Topping" },
-  { id: 8, name: "BBQ Dip",            price: 25,  category: "Sauce" },
-  { id: 9, name: "Sriracha Mayo",      price: 25,  category: "Sauce" },
-  { id: 10, name: "Truffle Oil Drizzle", price: 150, category: "Premium" },
-  { id: 11, name: "Avocado Slices",    price: 95,  category: "Topping" },
-  { id: 12, name: "Vanilla Ice Cream Scoop", price: 70, category: "Dessert" },
+  { id: 1,  name: "Extra Cheese",            emoji: "🧀",  price: 50,  category: "Topping", type: "Uncategorized", cogs: 20, available: true, used: 0 },
+  { id: 2,  name: "Extra Mayonnaise",        emoji: "🥣",  price: 30,  category: "Sauce",   type: "Uncategorized", cogs: 10, available: true, used: 0 },
+  { id: 3,  name: "French Fries",            emoji: "🍟",  price: 90,  category: "Side",    type: "Uncategorized", cogs: 35, available: true, used: 0 },
+  { id: 4,  name: "Honey",                   emoji: "🍯",  price: 20,  category: "Sweet",   type: "Uncategorized", cogs: 8,  available: true, used: 0 },
+  { id: 5,  name: "Sugar Syrup",             emoji: "🍶",  price: 20,  category: "Sweet",   type: "Uncategorized", cogs: 6,  available: true, used: 1 },
+  { id: 6,  name: "Bacon Strips",            emoji: "🥓",  price: 120, category: "Topping", type: "Non-Veg",      cogs: 70, available: true, used: 0 },
+  { id: 7,  name: "Jalapeños",               emoji: "🌶️",  price: 35,  category: "Topping", type: "Veg",          cogs: 12, available: true, used: 0 },
+  { id: 8,  name: "Onion Rings",             emoji: "🧅",  price: 130, category: "Side",    type: "Veg",          cogs: 55, available: true, used: 0 },
+  { id: 9,  name: "Mushroom Sauté",          emoji: "🍄",  price: 80,  category: "Topping", type: "Veg",          cogs: 30, available: true, used: 0 },
+  { id: 10, name: "BBQ Dip",                 emoji: "🍯",  price: 25,  category: "Sauce",   type: "Veg",          cogs: 8,  available: true, used: 0 },
+  { id: 11, name: "Sriracha Mayo",           emoji: "🌶️",  price: 25,  category: "Sauce",   type: "Veg",          cogs: 8,  available: true, used: 0 },
+  { id: 12, name: "Truffle Oil Drizzle",     emoji: "🫒",  price: 150, category: "Premium", type: "Vegan",        cogs: 60, available: true, used: 0 },
 ];
 
 /* ── combo offers ─────────────────────────────────────────────── */

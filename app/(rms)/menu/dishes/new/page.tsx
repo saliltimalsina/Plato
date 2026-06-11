@@ -7,14 +7,15 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerBody,
 } from "@heroui/react";
 import {
-  ArrowLeft, UploadCloud, Plus, Pencil, X, Search,
+  ArrowLeft, UploadCloud, Plus, Pencil, X, Search, Trash2,
 } from "lucide-react";
 import { ModalShell, ModalFooterButtons, labelCx, wrapCx, inputCx } from "@/components/rms/ModalShell";
 import { ORANGE } from "@/components/rms/primitives";
 import {
-  DishType, DISH_TYPES, DISH_TYPE_COLOR,
+  DishType, DISH_TYPES, DISH_TYPE_EMOJI,
   SUB_MENUS, CATEGORIES, ADDONS,
 } from "@/components/rms/data/menu";
+import { ITEMS as STOCK_ITEMS, UNITS } from "@/components/stock/data";
 
 const Req = () => <span className="text-[#F15022] ml-[2px]">*</span>;
 
@@ -22,6 +23,17 @@ interface LocalAddon { id: number; name: string; price: number; used: number }
 const initialAddons: LocalAddon[] = ADDONS.map((a) => ({
   id: a.id, name: a.name, price: a.price, used: 0,
 }));
+
+/* stock consumption row */
+interface StockUsageRow {
+  id: number;
+  stockItem: string;
+  unit: string;
+  qty: string;
+}
+const newStockRow = (id: number): StockUsageRow => ({
+  id, stockItem: "", unit: "", qty: "",
+});
 
 export default function CreateDishPage() {
   const router = useRouter();
@@ -49,6 +61,8 @@ export default function CreateDishPage() {
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
   const [openAddonsDrawer, setOpenAddonsDrawer] = useState(false);
   const [openNewAddonModal, setOpenNewAddonModal] = useState(false);
+  const [openStockModal, setOpenStockModal] = useState(false);
+  const [stockRows, setStockRows] = useState<StockUsageRow[]>([newStockRow(1)]);
 
   const listedPrice = Number(actualPrice) || 0;
   const finalPrice  = Math.max(0, listedPrice - (Number(discount) || 0));
@@ -97,17 +111,28 @@ export default function CreateDishPage() {
             selectedKeys={type ? [type] : []}
             onSelectionChange={(k) => setType((Array.from(k)[0] as DishType) ?? "")}
             startContent={
-              type
-                ? <span className="w-[14px] h-[14px] rounded-[4px] flex-shrink-0" style={{ background: DISH_TYPE_COLOR[type] }} />
-                : <span className="w-[12px] h-[12px] rounded-full bg-warm-200 flex-shrink-0" />
+              type && type !== "-"
+                ? <span className="text-[16px] leading-none">{DISH_TYPE_EMOJI[type]}</span>
+                : <span className="w-[14px] h-[14px] rounded-full bg-warm-200 flex-shrink-0" />
             }
             variant="bordered" radius="md"
-            classNames={{ label: labelCx, trigger: wrapCx, value: inputCx }}
+            classNames={{
+              label: labelCx, trigger: wrapCx, value: inputCx,
+              listboxWrapper: "p-1",
+            }}
           >
             {DISH_TYPES.map((t) => (
               <SelectItem
                 key={t}
-                startContent={<span className="w-[14px] h-[14px] rounded-[4px] flex-shrink-0" style={{ background: DISH_TYPE_COLOR[t] }} />}
+                startContent={
+                  <span className="w-7 h-7 rounded-[8px] bg-warm-50 border border-warm-200 flex items-center justify-center text-[14px] flex-shrink-0">
+                    {DISH_TYPE_EMOJI[t]}
+                  </span>
+                }
+                classNames={{
+                  base: "data-[selected=true]:bg-[#FFF1EB] data-[hover=true]:bg-warm-50 rounded-[10px]",
+                  title: "font-semibold text-[13.5px]",
+                }}
               >
                 {t}
               </SelectItem>
@@ -246,9 +271,12 @@ export default function CreateDishPage() {
                 <span className="text-warm-600">COGS: <span className="font-bold text-ink tnum">Rs {cogs}</span></span>
                 <span className="font-bold tnum" style={{ color: "#15803D" }}>Gross Profit: Rs {grossProfit.toFixed(2)}</span>
               </div>
-              <button className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-warm-600 hover:text-ink">
+              <button
+                onClick={() => setOpenStockModal(true)}
+                className="inline-flex items-center gap-2 h-8 px-3 rounded-[9px] border text-[12.5px] font-bold transition-colors"
+                style={{ background: "#FFF1EB", borderColor: "#F8C9B6", color: ORANGE }}>
                 Setup stock consumption
-                <Pencil size={13} color="#8A7D72" />
+                <Pencil size={13} color={ORANGE} />
               </button>
             </div>
           </div>
@@ -375,6 +403,15 @@ export default function CreateDishPage() {
             setSelectedAddons((p) => new Set(p).add(id));
             setOpenNewAddonModal(false);
           }}
+        />
+      )}
+
+      {openStockModal && (
+        <StockConsumptionModal
+          rows={stockRows}
+          setRows={setStockRows}
+          onClose={() => setOpenStockModal(false)}
+          onSave={() => setOpenStockModal(false)}
         />
       )}
     </div>
@@ -528,6 +565,109 @@ function NewAddonModal({
           startContent={<span className="text-[13px] text-warm-500 font-semibold">Rs</span>}
           classNames={{ label: labelCx, inputWrapper: wrapCx, input: `${inputCx} tnum` }}
         />
+      </div>
+    </ModalShell>
+  );
+}
+
+/* ── Stock Consumption modal ───────────────────────────────────── */
+function StockConsumptionModal({
+  rows, setRows, onClose, onSave,
+}: {
+  rows: StockUsageRow[];
+  setRows: (fn: (p: StockUsageRow[]) => StockUsageRow[]) => void;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  const add    = () => setRows((r) => [...r, newStockRow((r.at(-1)?.id ?? 0) + 1)]);
+  const remove = (id: number) => setRows((r) => (r.length > 1 ? r.filter((x) => x.id !== id) : r));
+  const patch  = (id: number, p: Partial<StockUsageRow>) =>
+    setRows((r) => r.map((x) => (x.id === id ? { ...x, ...p } : x)));
+
+  const valid = rows.every((r) => r.stockItem && r.unit && Number(r.qty) > 0);
+
+  return (
+    <ModalShell
+      title="Stock Used or Reduced after Sales"
+      size="3xl"
+      onClose={onClose}
+      footer={
+        <div className="flex items-center justify-between gap-3 w-full">
+          <Button variant="light" radius="md" className="font-semibold text-warm-600"
+            onPress={() => setRows(() => [newStockRow(1)])}>
+            Reset
+          </Button>
+          <ModalFooterButtons onCancel={onClose} onConfirm={onSave}
+            confirmLabel="Save Consumption" disabled={!valid} />
+        </div>
+      }
+    >
+      <div className="border border-warm-200 rounded-[12px] overflow-hidden">
+        <div className="grid gap-x-3 bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em] min-w-[640px]"
+          style={{ gridTemplateColumns: "1.6fr 0.8fr 0.7fr 0.9fr 40px" }}>
+          <span>Stocks<Req /></span>
+          <span>Unit<Req /></span>
+          <span>QTY<Req /></span>
+          <span>Amount</span>
+          <span />
+        </div>
+        {rows.map((row, i) => {
+          const stock = STOCK_ITEMS.find((s) => s.name === row.stockItem);
+          const amount = (Number(row.qty) || 0) * (stock?.rateNum ?? 0);
+          return (
+            <div key={row.id} className="grid gap-x-3 px-4 py-3 items-center min-w-[640px]"
+              style={{
+                gridTemplateColumns: "1.6fr 0.8fr 0.7fr 0.9fr 40px",
+                borderBottom: i === rows.length - 1 ? "none" : "1px solid #F4EFEB",
+              }}>
+              <Select
+                size="sm" aria-label="Stock Item" placeholder="Select Stock Item"
+                selectedKeys={row.stockItem ? [row.stockItem] : []}
+                onSelectionChange={(k) => {
+                  const v = Array.from(k)[0] as string;
+                  const it = STOCK_ITEMS.find((x) => x.name === v);
+                  patch(row.id, { stockItem: v, unit: it?.unit ?? row.unit });
+                }}
+                variant="bordered" radius="md"
+                classNames={{ trigger: wrapCx, value: inputCx }}>
+                {STOCK_ITEMS.map((s) => <SelectItem key={s.name}>{s.name}</SelectItem>)}
+              </Select>
+              <Select
+                size="sm" aria-label="Unit" placeholder="Unit"
+                selectedKeys={row.unit ? [row.unit] : []}
+                onSelectionChange={(k) => patch(row.id, { unit: Array.from(k)[0] as string })}
+                variant="bordered" radius="md"
+                classNames={{ trigger: wrapCx, value: inputCx }}>
+                {UNITS.map((u) => <SelectItem key={u}>{u}</SelectItem>)}
+              </Select>
+              <Input
+                size="sm" aria-label="QTY" type="number" placeholder="0"
+                value={row.qty} onValueChange={(v) => patch(row.id, { qty: v })}
+                variant="bordered"
+                classNames={{ inputWrapper: wrapCx, input: `${inputCx} text-right tnum` }} />
+              <div className="h-10 flex items-center px-3 rounded-[9px] bg-warm-50 border border-warm-200 text-[13px] font-semibold text-ink tnum">
+                <span className="text-warm-500 text-[12px] mr-1">Rs</span>
+                {amount.toFixed(2)}
+              </div>
+              <button
+                onClick={() => remove(row.id)}
+                className="w-9 h-9 rounded-[9px] flex items-center justify-center border border-warm-200 bg-white hover:bg-warm-100 transition-colors"
+                title="Remove row"
+              >
+                <Trash2 size={14} color="#8A7D72" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-3 mt-1">
+        <Button size="sm" variant="bordered" radius="md"
+          className="h-9 border border-[#E6E1DC] bg-white font-semibold text-warm-700 text-[12.5px]"
+          startContent={<Plus size={14} color="#6B5F55" strokeWidth={2.4} />}
+          onPress={add}>
+          Add More
+        </Button>
       </div>
     </ModalShell>
   );

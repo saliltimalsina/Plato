@@ -22,3 +22,52 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ─────────────── auth flow (login/signup/forgot/pin/reset) ─────────────── */
+.auth-wrap {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.auth-photo {
+  position: relative;
+  width: 57%;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: #1a1512;
+}
+.auth-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: #fffdfb;
+  min-height: 0;
+  overflow-y: auto;
+}
+.auth-wrap input::placeholder {
+  color: #b0a69e;
+}
+
+@keyframes authIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.auth-card {
+  animation: authIn 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+@keyframes authSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.auth-slide {
+  animation: authSlideIn 0.65s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* responsive: drop the photo on narrow viewports, center the card */
+@media (max-width: 900px) {
+  .auth-photo { display: none; }
+  .auth-right { width: 100%; }
+}
+

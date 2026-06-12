@@ -455,13 +455,13 @@ export default function AddonsPage() {
     {
       key: "most", icon: Heart, tint: "#FDECE4", accent: ORANGE,
       label: "Most Used", value: mostUsed.name,
-      sub: `${mostUsed.used} dishes`,
+      delta: `${mostUsed.used} dishes`, deltaTone: "purple",
       sparkData: [1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, mostUsed.used || 1],
     },
     {
       key: "top", icon: Box, tint: "#F4EFEB", accent: "#6B5F55",
       label: "Top Add-Ons Type", value: topType.name,
-      sub: String(topType.count),
+      delta: `${topType.count} item${topType.count === 1 ? "" : "s"}`, deltaTone: "amber",
       sparkData: [2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, topType.count || 1],
     },
   ];

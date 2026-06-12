@@ -100,7 +100,7 @@ export default function SubMenusPage() {
       sparkData: [2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 7, activeCount] },
     { key: "top", icon: Star, tint: "#FEF3E2", accent: "#F59E0B",
       label: "Top Sold", value: topSold.name,
-      sub: `${topSold.orders} dishes`,
+      delta: `${topSold.orders} dishes`, deltaTone: "purple",
       sparkData: [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, Math.max(1, topSold.orders)] },
     { key: "avg", icon: Calculator, tint: "#F3ECFF", accent: "#9B51E0",
       label: "Avg. Dishes Per Sub Menu", value: avgDishes,

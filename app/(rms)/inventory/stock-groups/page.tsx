@@ -160,7 +160,7 @@ export default function StockGroupsPage() {
     {
       key: "most", icon: Star, tint: "#FDECE4", accent: ORANGE,
       label: "Group with Most Items", value: mostItemsGroup.name,
-      sub: `${mostItemsGroup.itemCount} items`,
+      delta: `${mostItemsGroup.itemCount} items`, deltaTone: "purple",
       sparkData: [1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
     },
   ];

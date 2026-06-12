@@ -49,12 +49,13 @@ export function ModalShell({ title, subtitle, size = "lg", baseClassName = "", o
   );
 }
 
-/* standard cancel + primary footer */
+/* standard cancel + primary footer — wrapped in a single flex group so callers
+   using `justify-between` keep Cancel + Confirm together on the right. */
 export function ModalFooterButtons({
   onCancel, onConfirm, confirmLabel, disabled,
 }: { onCancel: () => void; onConfirm: () => void; confirmLabel: string; disabled?: boolean }) {
   return (
-    <>
+    <div className="flex items-center gap-2">
       <Button variant="bordered" radius="md" className="border border-[#E6E1DC] bg-white font-semibold text-warm-600" onPress={onCancel}>
         Cancel
       </Button>
@@ -71,7 +72,7 @@ export function ModalFooterButtons({
       >
         {confirmLabel}
       </Button>
-    </>
+    </div>
   );
 }
 

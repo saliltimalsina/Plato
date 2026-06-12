@@ -7,7 +7,7 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, useDisclosure,
   type Selection,
 } from "@heroui/react";
-import { Search, SlidersHorizontal, Plus, MoreHorizontal, LucideIcon } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, MoreHorizontal, ChevronDown, LucideIcon } from "lucide-react";
 import { ORANGE, KpiRow, KpiData, PageHeader } from "./primitives";
 import { DataTable, Column } from "./DataTable";
 import type { ListState } from "./useListState";
@@ -38,8 +38,12 @@ interface Props<T extends { id: number }> {
 
   addLabel?: string;
   onAdd?: () => void;
+  addOptions?: MoreAction[];
+  onAddOption?: (key: string) => void;
   moreActions?: MoreAction[];
   onMore?: (key: string) => void;
+  /** Rendered between page header and KPI row (e.g. filter chips). */
+  aboveKpis?: React.ReactNode;
 }
 
 export function ListScaffold<T extends { id: number }>(p: Props<T>) {
@@ -86,11 +90,34 @@ export function ListScaffold<T extends { id: number }>(p: Props<T>) {
               </Popover>
             )}
             {p.onAdd && (
-              <Button size="sm" radius="md" className="h-9 text-white font-bold"
-                style={{ background: ORANGE, boxShadow: "0 2px 8px rgba(241,80,34,0.32)" }}
-                startContent={<Plus size={16} color="#fff" strokeWidth={2.4} />} onPress={p.onAdd}>
-                {p.addLabel ?? "Add New"}
-              </Button>
+              p.addOptions && p.addOptions.length > 0 ? (
+                <div className="inline-flex items-stretch rounded-md overflow-hidden" style={{ background: ORANGE, boxShadow: "0 2px 8px rgba(241,80,34,0.32)" }}>
+                  <Button size="sm" radius="none" className="h-9 text-white font-bold bg-transparent rounded-none"
+                    startContent={<Plus size={16} color="#fff" strokeWidth={2.4} />} onPress={p.onAdd}>
+                    {p.addLabel ?? "Add New"}
+                  </Button>
+                  <div className="w-px bg-white/30 my-[6px]" />
+                  <Dropdown placement="bottom-end">
+                    <DropdownTrigger>
+                      <Button isIconOnly size="sm" radius="none" className="h-9 w-8 min-w-8 bg-transparent rounded-none" aria-label="More add options">
+                        <ChevronDown size={16} color="#fff" strokeWidth={2.4} />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu aria-label="Add options" onAction={(k) => p.onAddOption?.(String(k))}>
+                      {p.addOptions.map((m) => {
+                        const Icon = m.icon;
+                        return <DropdownItem key={m.key} startContent={<Icon size={15} color="#8A7D72" />}>{m.label}</DropdownItem>;
+                      })}
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+              ) : (
+                <Button size="sm" radius="md" className="h-9 text-white font-bold"
+                  style={{ background: ORANGE, boxShadow: "0 2px 8px rgba(241,80,34,0.32)" }}
+                  startContent={<Plus size={16} color="#fff" strokeWidth={2.4} />} onPress={p.onAdd}>
+                  {p.addLabel ?? "Add New"}
+                </Button>
+              )
             )}
             {p.moreActions && p.moreActions.length > 0 && (
               <Dropdown placement="bottom-end">
@@ -111,6 +138,7 @@ export function ListScaffold<T extends { id: number }>(p: Props<T>) {
         }
       />
 
+      {p.aboveKpis}
       {p.kpis && p.kpis.length > 0 && <KpiRow kpis={p.kpis} />}
 
       {/* mobile: search + filter button */}

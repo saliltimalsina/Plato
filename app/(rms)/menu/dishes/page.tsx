@@ -6,12 +6,17 @@ import {
   Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Switch,
   Select, SelectItem,
 } from "@heroui/react";
-import { Utensils, Star, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Utensils, Star, MoreHorizontal, Pencil, Trash2,
+  UploadCloud, FileSpreadsheet, ImagePlus, PlusCircle,
+  Receipt, Download, Columns3, Layers,
+  TrendingUp,
+} from "lucide-react";
 import { ListScaffold } from "@/components/rms/ListScaffold";
 import { DeleteModal, labelCx, wrapCx, inputCx } from "@/components/rms/ModalShell";
 import { KpiData, Badge, ORANGE } from "@/components/rms/primitives";
 import { useListState } from "@/components/rms/useListState";
-import { Dish, DISHES, DISH_TYPE_COLOR, priceLabel, DishType } from "@/components/rms/data/menu";
+import { Dish, DISHES, DISH_TYPE_COLOR, priceLabel, DishType, CATEGORIES, SUB_MENUS } from "@/components/rms/data/menu";
 import { DishDetailDrawer } from "@/components/menu/DishDetailDrawer";
 
 const DISH_TYPE_FILTERS: ("All" | DishType)[] = [
@@ -31,15 +36,25 @@ const COLUMNS = [
   { key: "actions",   label: "", align: "center" as const },
 ];
 
+const KOT_TYPE_FILTERS = ["All", "KOT", "BOT"] as const;
+
 export default function DishesPage() {
   const router = useRouter();
   const [typeFilter, setTypeFilter] = useState<"All" | DishType>("All");
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
+  const [subMenuFilter, setSubMenuFilter] = useState<string>("All");
+  const [kotTypeFilter, setKotTypeFilter] = useState<string>("All");
   const [viewing, setViewing] = useState<Dish | null>(null);
 
   const filterPredicate = useMemo(
-    () => (d: Dish) =>
-      typeFilter === "All" || d.type === typeFilter || d.variants.some((v) => v.type === typeFilter),
-    [typeFilter],
+    () => (d: Dish) => {
+      if (typeFilter !== "All" && d.type !== typeFilter && !d.variants.some((v) => v.type === typeFilter)) return false;
+      if (categoryFilter !== "All" && d.category !== categoryFilter) return false;
+      if (subMenuFilter !== "All" && d.subMenu !== subMenuFilter) return false;
+      if (kotTypeFilter !== "All" && (d.kotType ?? "") !== kotTypeFilter) return false;
+      return true;
+    },
+    [typeFilter, categoryFilter, subMenuFilter, kotTypeFilter],
   );
 
   const s = useListState<Dish>({
@@ -64,6 +79,17 @@ export default function DishesPage() {
     return { name: (e?.[0] as DishType) ?? "—", count: e?.[1] ?? 0 };
   }, [s.items]);
 
+  const topSold = useMemo(() => {
+    let best = { name: "—", count: 0 };
+    for (const d of s.items) {
+      for (const v of d.variants) {
+        const total = (v.transactions ?? []).reduce((acc, t) => acc + t.qty, 0);
+        if (total > best.count) best = { name: `${d.name}-${v.name}`, count: total };
+      }
+    }
+    return best;
+  }, [s.items]);
+
   const kpis: KpiData[] = [
     {
       key: "total", icon: Utensils, tint: "#E3F6F1", accent: "#1FA98B",
@@ -72,9 +98,15 @@ export default function DishesPage() {
       sparkData: [2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, s.items.length],
     },
     {
+      key: "topSold", icon: TrendingUp, tint: "#FEF2E5", accent: "#F59E0B",
+      label: "Top Sold", value: topSold.name,
+      delta: `${topSold.count} order${topSold.count === 1 ? "" : "s"}`, deltaTone: "blue",
+      sparkData: [1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, topSold.count || 1],
+    },
+    {
       key: "top", icon: Star, tint: "#FDECE4", accent: ORANGE,
       label: "Top Dish Type", value: topType.name,
-      sub: `${topType.count} dish${topType.count === 1 ? "" : "es"}`,
+      delta: `${topType.count} dish${topType.count === 1 ? "" : "es"}`, deltaTone: "purple",
       sparkData: [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, topType.count || 1],
     },
   ];
@@ -89,7 +121,15 @@ export default function DishesPage() {
       case "name":     return (
         <button onClick={() => setViewing(d)}
           className="inline-flex items-center gap-2 text-left hover:text-[#F15022] transition-colors">
-          <span className="w-7 h-7 rounded-[8px] bg-warm-100 flex items-center justify-center text-[14px] flex-shrink-0">{d.emoji}</span>
+          <span className="relative w-7 h-7 rounded-[8px] bg-warm-100 flex items-center justify-center text-[14px] flex-shrink-0">
+            {d.emoji}
+            {d.recommended && (
+              <span className="absolute -top-[5px] -right-[5px] w-[14px] h-[14px] rounded-full flex items-center justify-center"
+                style={{ background: "#F4B400", boxShadow: "0 1px 2px rgba(0,0,0,0.15)" }}>
+                <Star size={8} color="#fff" fill="#fff" strokeWidth={2.4} />
+              </span>
+            )}
+          </span>
           <span className="text-[13.5px] font-semibold text-ink whitespace-nowrap">{d.name}</span>
         </button>
       );
@@ -118,8 +158,12 @@ export default function DishesPage() {
             </Button>
           </DropdownTrigger>
           <DropdownMenu aria-label="Row actions">
-            <DropdownItem key="view"  startContent={<Pencil size={15} color="#8A7D72" />} onPress={() => setViewing(d)}>View</DropdownItem>
-            <DropdownItem key="edit"  startContent={<Pencil size={15} color="#8A7D72" />} onPress={() => s.setEditing(d)}>Edit</DropdownItem>
+            <DropdownItem key="edit"  startContent={<Pencil size={15} color="#8A7D72" />} onPress={() => s.setEditing(d)}>Edit Dish</DropdownItem>
+            <DropdownItem key="rec"   className="text-[#F15022]" color="danger"
+              startContent={<Star size={15} color="#F15022" />}
+              onPress={() => s.save({ ...d, recommended: !d.recommended })}>
+              {d.recommended ? "Remove recommendation" : "Add recommendation"}
+            </DropdownItem>
             <DropdownItem key="del"   className="text-[#F15022]" color="danger"
               startContent={<Trash2 size={15} color="#F15022" />}
               onPress={() => s.setDel({ item: d })}>
@@ -157,14 +201,52 @@ export default function DishesPage() {
     </div>
   );
 
+  const activeFilterCount =
+    (typeFilter === "All" ? 0 : 1) +
+    (categoryFilter === "All" ? 0 : 1) +
+    (subMenuFilter === "All" ? 0 : 1) +
+    (kotTypeFilter === "All" ? 0 : 1);
+
+  const clearAll = () => {
+    setTypeFilter("All"); setCategoryFilter("All");
+    setSubMenuFilter("All"); setKotTypeFilter("All");
+  };
+
   const filterContent = (
     <div className="w-full p-3 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-[12px] font-bold text-ink">Filters</span>
-        {typeFilter !== "All" && (
-          <button onClick={() => setTypeFilter("All")} className="text-[11.5px] font-semibold" style={{ color: ORANGE }}>Clear</button>
+        {activeFilterCount > 0 && (
+          <button onClick={clearAll} className="text-[11.5px] font-semibold" style={{ color: ORANGE }}>Clear</button>
         )}
       </div>
+      <Select
+        label="Category" labelPlacement="outside"
+        selectedKeys={[categoryFilter]}
+        onSelectionChange={(k) => setCategoryFilter(Array.from(k)[0] as string)}
+        size="sm" variant="bordered" radius="md"
+        classNames={{ label: labelCx, trigger: wrapCx, value: inputCx }}
+      >
+        {(["All", ...CATEGORIES.map((c) => c.name)]).map((t) => <SelectItem key={t}>{t}</SelectItem>)}
+      </Select>
+      <Select
+        label="Sub-Menu" labelPlacement="outside"
+        selectedKeys={[subMenuFilter]}
+        onSelectionChange={(k) => setSubMenuFilter(Array.from(k)[0] as string)}
+        size="sm" variant="bordered" radius="md"
+        classNames={{ label: labelCx, trigger: wrapCx, value: inputCx }}
+      >
+        {(["All", ...SUB_MENUS.map((m) => m.name)]).map((t) => <SelectItem key={t}>{t}</SelectItem>)}
+      </Select>
+      <Select
+        label="KOT Type" labelPlacement="outside"
+        selectedKeys={[kotTypeFilter]}
+        onSelectionChange={(k) => setKotTypeFilter(Array.from(k)[0] as string)}
+        size="sm" variant="bordered" radius="md"
+        classNames={{ label: labelCx, trigger: wrapCx, value: inputCx }}
+      >
+        {KOT_TYPE_FILTERS.map((t) => <SelectItem key={t}>{t}</SelectItem>)}
+      </Select>
       <Select
         label="Type" labelPlacement="outside"
         selectedKeys={[typeFilter]}
@@ -191,8 +273,24 @@ export default function DishesPage() {
         searchPlaceholder="Search dishes…"
         addLabel="Add New"
         onAdd={() => router.push("/menu/dishes/new")}
+        addOptions={[
+          { key: "new",        label: "Add New Dish",      icon: PlusCircle },
+          { key: "bulk",       label: "Upload Bulk Dish",  icon: UploadCloud },
+          { key: "excel",      label: "Import From Excel", icon: FileSpreadsheet },
+          { key: "images",     label: "Import From Images",icon: ImagePlus },
+        ]}
+        onAddOption={(k) => {
+          if (k === "new") router.push("/menu/dishes/new");
+        }}
+        moreActions={[
+          { key: "menuset",  label: "Edit Menuset Price", icon: Receipt },
+          { key: "export",   label: "Export",             icon: Download },
+          { key: "columns",  label: "Columns",            icon: Columns3 },
+          { key: "overview", label: "Overview Cards",     icon: Layers },
+        ]}
+        onMore={() => {}}
         filterContent={filterContent}
-        filterCount={typeFilter === "All" ? 0 : 1}
+        filterCount={activeFilterCount}
       />
 
       {s.del && (
@@ -216,3 +314,4 @@ export default function DishesPage() {
     </>
   );
 }
+

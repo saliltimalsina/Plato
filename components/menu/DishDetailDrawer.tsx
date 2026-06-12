@@ -8,7 +8,7 @@ import {
 } from "@heroui/react";
 import { Pencil, Trash2, X, Calendar, ChevronDown } from "lucide-react";
 import { ModalShell, labelCx, wrapCx, inputCx } from "@/components/rms/ModalShell";
-import { Dish, DISH_TYPE_COLOR, priceLabel } from "@/components/rms/data/menu";
+import { Dish, DISH_TYPE_COLOR, priceLabel, ADDONS } from "@/components/rms/data/menu";
 
 interface Props {
   dish: Dish;
@@ -85,6 +85,7 @@ function DetailsTab({
   dish, onToggle, onToggleRecommended,
 }: { dish: Dish; onToggle: (v: boolean) => void; onToggleRecommended: (v: boolean) => void }) {
   const [pricesOpen, setPricesOpen] = useState(false);
+  const attachedAddons = ADDONS.filter((a) => (dish.addons ?? []).includes(a.id));
   return (
     <>
       <div className="border border-warm-200 rounded-[14px] p-4">
@@ -128,6 +129,26 @@ function DetailsTab({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="border border-warm-200 rounded-[14px] p-4">
+        <h3 className="text-[13px] font-extrabold text-ink mb-3">Add-Ons or Extras</h3>
+        {attachedAddons.length === 0 ? (
+          <div className="text-[12.5px] text-warm-500 font-medium py-2">No add-ons attached.</div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {attachedAddons.map((a) => (
+              <div key={a.id}
+                className="flex items-center justify-between gap-3 rounded-[10px] bg-warm-50 border border-warm-200 px-3 py-[10px]">
+                <div className="flex items-center gap-[10px] min-w-0">
+                  <span className="text-[15px] flex-shrink-0">{a.emoji ?? "🍽️"}</span>
+                  <span className="text-[13.5px] font-bold text-ink truncate">{a.name}</span>
+                </div>
+                <span className="text-[13.5px] font-extrabold text-ink tnum">Rs {a.price}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="border border-warm-200 rounded-[14px] p-4">

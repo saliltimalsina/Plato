@@ -120,13 +120,13 @@ export default function CategoryPage() {
     {
       key: "top", icon: Star, tint: "#FDECE4", accent: ORANGE,
       label: "Top Sold", value: mostDishes.name,
-      sub: `${mostDishes.count} orders`,
+      delta: `${mostDishes.count} orders`, deltaTone: "blue",
       sparkData: [1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, mostDishes.count || 1],
     },
     {
       key: "most", icon: Award, tint: "#FEE2E2", accent: "#E5484D",
       label: "Most Dishes", value: mostDishes.name,
-      sub: `${mostDishes.count} dishes`,
+      delta: `${mostDishes.count} dishes`, deltaTone: "purple",
       sparkData: [1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, mostDishes.count || 1],
     },
     {

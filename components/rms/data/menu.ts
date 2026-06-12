@@ -39,6 +39,7 @@ export interface Dish {
   hsCode?: string;
   available: boolean;
   recommended?: boolean;
+  addons?: number[]; // Addon ids attached to dish
   variants: DishVariant[];
 }
 
@@ -48,6 +49,7 @@ export const DISHES: Dish[] = [
     category: "Lunch", subMenu: "Food Menu", type: "-",
     prepTime: "12 min", kotType: "KOT", hsCode: "2106.90",
     available: true, recommended: true,
+    addons: [1, 2, 3, 7],
     variants: [
       {
         id: 1, name: "Chicken", type: "Non-Veg",
@@ -100,6 +102,7 @@ export const DISHES: Dish[] = [
     category: "Lunch", subMenu: "Food Menu", type: "Non-Veg",
     prepTime: "18 min", kotType: "KOT", hsCode: "1905.90",
     available: true, recommended: true,
+    addons: [1, 7, 9, 10],
     variants: [
       {
         id: 1, name: "Regular", type: "Non-Veg",

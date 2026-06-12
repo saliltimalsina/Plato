@@ -79,6 +79,17 @@ export function Avatar({ initials, color = "#9A8C80", size = 40 }: { initials: s
 }
 
 /* ── KPI card ───────────────────────────────────────────────── */
+export type KpiTone = "green" | "orange" | "blue" | "purple" | "amber" | "red";
+
+const TONE_STYLES: Record<KpiTone, { fg: string; bg: string }> = {
+  green:  { fg: "#15803D", bg: "#E7F6EC" },
+  orange: { fg: "#C2410C", bg: "#FDECE4" },
+  blue:   { fg: "#0369A1", bg: "#E0F2FE" },
+  purple: { fg: "#6D28D9", bg: "#EDE9FE" },
+  amber:  { fg: "#B45309", bg: "#FEF3C7" },
+  red:    { fg: "#B91C1C", bg: "#FEE2E2" },
+};
+
 export interface KpiData {
   key: string;
   icon: LucideIcon;
@@ -89,6 +100,8 @@ export interface KpiData {
   sub?: string;
   delta?: string;
   deltaUp?: boolean;
+  /** Pill color tone — overrides deltaUp's green/orange. No trend arrow when set. */
+  deltaTone?: KpiTone;
   sparkData: number[];
 }
 
@@ -105,18 +118,25 @@ export function KpiCard({ kpi }: { kpi: KpiData }) {
             </div>
             <span className="text-[12.5px] font-semibold text-[#8A8079]">{kpi.label}</span>
           </div>
-          {kpi.delta && (
-            <span className="inline-flex items-center gap-[3px] px-[7px] py-[2px] rounded-full text-[11.5px] font-bold"
-              style={{ color: kpi.deltaUp ? "#15803D" : "#C2410C", background: kpi.deltaUp ? "#E7F6EC" : "#FDECE4" }}>
-              {kpi.deltaUp ? <TrendingUp size={12} color="#15803D" /> : <TrendingDown size={12} color="#C2410C" />}
-              {kpi.delta}
-            </span>
-          )}
+          {kpi.delta && (() => {
+            const tone = kpi.deltaTone ?? (kpi.deltaUp ? "green" : "orange");
+            const { fg, bg } = TONE_STYLES[tone];
+            const showArrow = !kpi.deltaTone && kpi.deltaUp !== undefined;
+            return (
+              <span className="inline-flex items-center gap-[3px] px-[8px] py-[2px] rounded-full text-[11.5px] font-bold whitespace-nowrap"
+                style={{ color: fg, background: bg }}>
+                {showArrow && (kpi.deltaUp
+                  ? <TrendingUp size={12} color={fg} />
+                  : <TrendingDown size={12} color={fg} />)}
+                {kpi.delta}
+              </span>
+            );
+          })()}
         </div>
-        <div className="flex items-end justify-between">
-          <div className="flex items-baseline gap-[5px]">
-            <span className="text-[28px] font-bold text-ink tracking-[-0.02em] tnum">{kpi.value}</span>
-            {kpi.sub && <span className="text-[13px] font-medium text-warm-500">{kpi.sub}</span>}
+        <div className="flex items-end justify-between gap-2">
+          <div className="flex items-baseline gap-[5px] min-w-0 flex-1">
+            <span className="text-[26px] font-bold text-ink tracking-[-0.02em] tnum truncate min-w-0" title={String(kpi.value)}>{kpi.value}</span>
+            {kpi.sub && <span className="text-[13px] font-medium text-warm-500 whitespace-nowrap">{kpi.sub}</span>}
           </div>
           <Spark data={kpi.sparkData} color={kpi.accent} />
         </div>

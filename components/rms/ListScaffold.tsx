@@ -44,6 +44,10 @@ interface Props<T extends { id: number }> {
   onMore?: (key: string) => void;
   /** Rendered between page header and KPI row (e.g. filter chips). */
   aboveKpis?: React.ReactNode;
+  emptyTitle?: string;
+  emptyHint?: string;
+  emptyIcon?: React.ReactNode;
+  emptyAction?: React.ReactNode;
 }
 
 export function ListScaffold<T extends { id: number }>(p: Props<T>) {
@@ -181,6 +185,10 @@ export function ListScaffold<T extends { id: number }>(p: Props<T>) {
         onRowOpen={p.onRowOpen}
         selectable={p.selectable}
         toolbarLeft={statusTabsEl}
+        emptyTitle={p.emptyTitle}
+        emptyHint={p.emptyHint}
+        emptyIcon={p.emptyIcon}
+        emptyAction={p.emptyAction}
       />
 
       {/* mobile FAB */}

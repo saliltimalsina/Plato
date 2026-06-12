@@ -370,32 +370,48 @@ export const ADDONS: Addon[] = [
 ];
 
 /* ── combo offers ─────────────────────────────────────────────── */
+export interface ComboItem {
+  dishId: number;
+  variantId?: number;
+  qty: number;
+  addonIds?: number[];
+}
 export interface Combo {
   id: number;
   name: string;
-  price: number;
-  items: number;
+  price: number;          // combo offer price
+  actualPrice?: number;   // sum of items
+  items: number;          // count
   description?: string;
+  type?: string;          // "Veg" / "Non-Veg" etc
+  category?: string;
+  subMenu?: string;
+  kotType?: string;
+  prepTime?: string;
+  hsCode?: string;
+  emoji?: string;
+  available?: boolean;
+  dishItems?: ComboItem[];
 }
 export const COMBOS: Combo[] = [
-  { id: 1,  name: "Burger + Coke",        price: 220,  items: 2, description: "Any burger variant + 1 chilled Coke bottle." },
-  { id: 2,  name: "Pizza Party",          price: 850,  items: 3, description: "1 large pizza + 2 sides of your choice." },
-  { id: 3,  name: "Cafe Breakfast",       price: 320,  items: 3, description: "Coffee + croissant + fruit bowl, served 8–11am." },
-  { id: 4,  name: "Family Feast",         price: 1450, items: 6, description: "2 mains, 2 sides, 2 drinks; serves 3–4 guests." },
-  { id: 5,  name: "Date Night",           price: 1100, items: 4, description: "2 mains + 2 desserts; valid Mon–Thu evenings." },
-  { id: 6,  name: "Kids Meal",            price: 250,  items: 3, description: "Small main + juice + scoop of ice cream." },
-  { id: 7,  name: "Office Lunch (×6)",    price: 1800, items: 6, description: "Six boxed lunches with same-day delivery." },
-  { id: 8,  name: "Veggie Lover",         price: 680,  items: 4, description: "Margherita + garlic bread + side salad + lemonade." },
-  { id: 9,  name: "Bar Snack Platter",    price: 950,  items: 5, description: "Wings, nachos, fries, sliders + 2 craft beers." },
-  { id: 10, name: "Weekend Brunch Set",   price: 1250, items: 5, description: "2 brunch mains + bottomless coffee + 2 mimosas." },
-  { id: 11, name: "Bachelor Combo",       price: 520,  items: 3, description: "Burger + fries + soft drink — under 10-min prep." },
-  { id: 12, name: "Late Night Bites",     price: 720,  items: 4, description: "After 11pm — 2 sliders + wings + drink." },
-  { id: 13, name: "Coffee + Cake Combo",  price: 380,  items: 2, description: "Any espresso drink + slice of cake." },
-  { id: 14, name: "Iftar Special",        price: 1100, items: 7, description: "Dates, soup, salad, kebabs, main, dessert + drink." },
-  { id: 15, name: "Valentine's For Two",  price: 2400, items: 6, description: "Wine, 2 starters, 2 mains, dessert — Feb 14 only." },
-  { id: 16, name: "Sunday Roast",         price: 1600, items: 5, description: "Roast + 3 sides + Yorkshire pudding, Sundays only." },
-  { id: 17, name: "Game Day Special",     price: 1350, items: 6, description: "Pizza + wings + nachos + pitcher of beer, match days." },
-  { id: 18, name: "Healthy Bowl Combo",   price: 580,  items: 3, description: "Grain bowl + cold-pressed juice + fruit salad." },
-  { id: 19, name: "Diwali Sweet Box",     price: 1850, items: 8, description: "Assorted Indian sweets, festive seasonal pack." },
-  { id: 20, name: "Birthday Party (×10)", price: 4200, items: 10,description: "Pizzas, snacks, cake and drinks for 10 guests." },
+  { id: 1,  name: "Burger + Coke",        emoji: "🍔", price: 220,  actualPrice: 260,  items: 2, type: "Non-Veg", category: "Lunch",     subMenu: "Food Menu",     kotType: "KOT", prepTime: "12 min", hsCode: "2106.90", available: true,  description: "Any burger variant + 1 chilled Coke bottle." },
+  { id: 2,  name: "Pizza Party",          emoji: "🍕", price: 850,  actualPrice: 980,  items: 3, type: "Non-Veg", category: "Dinner",    subMenu: "Food Menu",     kotType: "KOT", prepTime: "22 min", hsCode: "1905.90", available: true,  description: "1 large pizza + 2 sides of your choice." },
+  { id: 3,  name: "Cafe Breakfast",       emoji: "🥐", price: 320,  actualPrice: 380,  items: 3, type: "Veg",     category: "Breakfast", subMenu: "Breakfast Menu", kotType: "BOT", prepTime: "8 min",  hsCode: "1905.40", available: true,  description: "Coffee + croissant + fruit bowl, served 8–11am." },
+  { id: 4,  name: "Family Feast",         emoji: "🍱", price: 1450, actualPrice: 1700, items: 6, type: "Non-Veg", category: "Dinner",    subMenu: "Food Menu",     kotType: "KOT", prepTime: "35 min", hsCode: "2106.90", available: true,  description: "2 mains, 2 sides, 2 drinks; serves 3–4 guests." },
+  { id: 5,  name: "Date Night",           emoji: "🍷", price: 1100, actualPrice: 1350, items: 4, type: "Non-Veg", category: "Dinner",    subMenu: "Tasting Menu",  kotType: "KOT", prepTime: "30 min", hsCode: "2106.90", available: true,  description: "2 mains + 2 desserts; valid Mon–Thu evenings." },
+  { id: 6,  name: "Kids Meal",            emoji: "🧒", price: 250,  actualPrice: 310,  items: 3, type: "Veg",     category: "Lunch",     subMenu: "Kids Menu",     kotType: "KOT", prepTime: "10 min", hsCode: "2106.90", available: true,  description: "Small main + juice + scoop of ice cream." },
+  { id: 7,  name: "Office Lunch (×6)",    emoji: "🥡", price: 1800, actualPrice: 2100, items: 6, type: "Non-Veg", category: "Lunch",     subMenu: "Express Lunch", kotType: "KOT", prepTime: "20 min", hsCode: "2106.90", available: true,  description: "Six boxed lunches with same-day delivery." },
+  { id: 8,  name: "Veggie Lover",         emoji: "🥗", price: 680,  actualPrice: 820,  items: 4, type: "Veg",     category: "Lunch",     subMenu: "Vegan Menu",    kotType: "KOT", prepTime: "18 min", hsCode: "2106.90", available: true,  description: "Margherita + garlic bread + side salad + lemonade." },
+  { id: 9,  name: "Bar Snack Platter",    emoji: "🍻", price: 950,  actualPrice: 1180, items: 5, type: "Non-Veg", category: "Snacks",    subMenu: "Bar Menu",      kotType: "KOT", prepTime: "15 min", hsCode: "2106.90", available: true,  description: "Wings, nachos, fries, sliders + 2 craft beers." },
+  { id: 10, name: "Weekend Brunch Set",   emoji: "🥞", price: 1250, actualPrice: 1500, items: 5, type: "Non-Veg", category: "Breakfast", subMenu: "Weekend Brunch", kotType: "KOT", prepTime: "25 min", hsCode: "2106.90", available: true,  description: "2 brunch mains + bottomless coffee + 2 mimosas." },
+  { id: 11, name: "Bachelor Combo",       emoji: "🍔", price: 520,  actualPrice: 620,  items: 3, type: "Non-Veg", category: "Lunch",     subMenu: "Express Lunch", kotType: "KOT", prepTime: "10 min", hsCode: "2106.90", available: true,  description: "Burger + fries + soft drink — under 10-min prep." },
+  { id: 12, name: "Late Night Bites",     emoji: "🌙", price: 720,  actualPrice: 880,  items: 4, type: "Non-Veg", category: "Snacks",    subMenu: "Late Night Menu", kotType: "KOT", prepTime: "15 min", hsCode: "2106.90", available: true,  description: "After 11pm — 2 sliders + wings + drink." },
+  { id: 13, name: "Coffee + Cake Combo",  emoji: "☕", price: 380,  actualPrice: 460,  items: 2, type: "Veg",     category: "Desserts",  subMenu: "Cafe Menu",     kotType: "BOT", prepTime: "5 min",  hsCode: "1905.90", available: true,  description: "Any espresso drink + slice of cake." },
+  { id: 14, name: "Iftar Special",        emoji: "🌙", price: 1100, actualPrice: 1350, items: 7, type: "Halal",   category: "Dinner",    subMenu: "Food Menu",     kotType: "KOT", prepTime: "30 min", hsCode: "2106.90", available: true,  description: "Dates, soup, salad, kebabs, main, dessert + drink." },
+  { id: 15, name: "Valentine's For Two",  emoji: "💝", price: 2400, actualPrice: 2900, items: 6, type: "Non-Veg", category: "Dinner",    subMenu: "Tasting Menu",  kotType: "KOT", prepTime: "45 min", hsCode: "2106.90", available: false, description: "Wine, 2 starters, 2 mains, dessert — Feb 14 only." },
+  { id: 16, name: "Sunday Roast",         emoji: "🍖", price: 1600, actualPrice: 1900, items: 5, type: "Non-Veg", category: "Dinner",    subMenu: "Food Menu",     kotType: "KOT", prepTime: "40 min", hsCode: "2106.90", available: true,  description: "Roast + 3 sides + Yorkshire pudding, Sundays only." },
+  { id: 17, name: "Game Day Special",     emoji: "🏈", price: 1350, actualPrice: 1620, items: 6, type: "Non-Veg", category: "Snacks",    subMenu: "Bar Menu",      kotType: "KOT", prepTime: "25 min", hsCode: "2106.90", available: true,  description: "Pizza + wings + nachos + pitcher of beer, match days." },
+  { id: 18, name: "Healthy Bowl Combo",   emoji: "🥗", price: 580,  actualPrice: 720,  items: 3, type: "Vegan",   category: "Lunch",     subMenu: "Vegan Menu",    kotType: "KOT", prepTime: "12 min", hsCode: "2106.90", available: true,  description: "Grain bowl + cold-pressed juice + fruit salad." },
+  { id: 19, name: "Diwali Sweet Box",     emoji: "🪔", price: 1850, actualPrice: 2200, items: 8, type: "Veg",     category: "Desserts",  subMenu: "Dessert Menu",  kotType: "BOT", prepTime: "10 min", hsCode: "1905.90", available: true,  description: "Assorted Indian sweets, festive seasonal pack." },
+  { id: 20, name: "Birthday Party (×10)", emoji: "🎂", price: 4200, actualPrice: 5000, items: 10,type: "Non-Veg", category: "Dinner",    subMenu: "Banquet Menu",  kotType: "KOT", prepTime: "60 min", hsCode: "2106.90", available: true,  description: "Pizzas, snacks, cake and drinks for 10 guests." },
 ];

@@ -28,11 +28,14 @@ interface Props<T extends { id: number }> {
   toolbarLeft?: React.ReactNode; // e.g. status tabs (hidden while selecting)
   emptyTitle?: string;
   emptyHint?: string;
+  emptyIcon?: React.ReactNode;
+  emptyAction?: React.ReactNode;
 }
 
 export function DataTable<T extends { id: number }>({
   state, totalCount, columns, renderCell, renderCard, onRowOpen,
   selectable = true, toolbarLeft, emptyTitle = "No items found", emptyHint = "Try adjusting your search or filters.",
+  emptyIcon, emptyAction,
 }: Props<T>) {
   const selectedKeys: Selection = useMemo(() => new Set(state.selected.map(String)), [state.selected]);
   const onSelectionChange = (keys: Selection) => {
@@ -46,11 +49,14 @@ export function DataTable<T extends { id: number }>({
 
   const empty = (
     <div className="py-[60px] text-center">
-      <div className="w-[52px] h-[52px] rounded-[14px] bg-warm-100 inline-flex items-center justify-center mb-3">
-        <Search size={22} color="#C9BCB0" />
-      </div>
+      {emptyIcon ?? (
+        <div className="w-[52px] h-[52px] rounded-[14px] bg-warm-100 inline-flex items-center justify-center mb-3">
+          <Search size={22} color="#C9BCB0" />
+        </div>
+      )}
       <div className="text-[14.5px] font-bold text-ink">{emptyTitle}</div>
       <div className="text-[13px] text-warm-500 mt-[3px]">{emptyHint}</div>
+      {emptyAction && <div className="mt-4 inline-flex">{emptyAction}</div>}
     </div>
   );
 

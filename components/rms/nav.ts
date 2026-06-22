@@ -24,8 +24,26 @@ export const NAV: NavSection[] = [
     items: [
       { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
       { label: "Orders", icon: ShoppingBag, href: "/orders" },
-      { label: "Tables", icon: Grid2X2, href: "/tables" },
-      { label: "Services", icon: Zap, href: "/services" },
+      {
+        label: "Table & Space",
+        icon: Grid2X2,
+        children: [
+          { label: "Table",    href: "/tables" },
+          { label: "Space",    href: "/tables/space" },
+          { label: "QR Codes", href: "/tables/qr-codes" },
+        ],
+      },
+      {
+        label: "Services",
+        icon: Zap,
+        children: [
+          { label: "Dine In",        href: "/services/dine-in" },
+          { label: "Delivery",       href: "/services/delivery" },
+          { label: "SMS",            href: "/services/sms" },
+          { label: "Stamp Programs", href: "/services/stamp-programs" },
+          { label: "Setting",        href: "/services/setting" },
+        ],
+      },
       { label: "Notification", icon: Bell, href: "/notification" },
     ],
   },

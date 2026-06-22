@@ -1,14 +1,5 @@
-"use client";
-
-import { Zap } from "lucide-react";
-import StubPage from "@/components/rms/StubPage";
+import { redirect } from "next/navigation";
 
 export default function ServicesPage() {
-  return (
-    <StubPage
-      title="Services"
-      icon={Zap}
-      description="Configure restaurant services."
-    />
-  );
+  redirect("/services/dine-in");
 }

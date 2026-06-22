@@ -16,6 +16,9 @@ import {
 import { KpiData, ORANGE } from "@/components/rms/primitives";
 import { useListState } from "@/components/rms/useListState";
 import { Addon, ADDONS, DISHES, Dish, priceLabel } from "@/components/rms/data/menu";
+import {
+  StockConsumptionModal, StockUsageRow, newStockRow, stockRowsCost,
+} from "@/components/rms/StockConsumptionModal";
 
 const Req = () => <span className="text-[#F15022] ml-[2px]">*</span>;
 
@@ -41,8 +44,13 @@ function AddonModal({
   const [discount, setDiscount] = useState(addon?.discount ? String(addon.discount) : "");
   const [description, setDescription] = useState(addon?.description ?? "");
 
+  /* stock consumption */
+  const [openStockModal, setOpenStockModal] = useState(false);
+  const [stockRows, setStockRows] = useState<StockUsageRow[]>([newStockRow(1)]);
+  const consumptionCost = stockRowsCost(stockRows);
+
   const listedPrice = Number(price) || 0;
-  const cogs = addon?.cogs ?? 0;
+  const cogs = consumptionCost > 0 ? consumptionCost : addon?.cogs ?? 0;
   const finalPrice = Math.max(0, listedPrice - (Number(discount) || 0));
   const grossProfit = Math.max(0, finalPrice - cogs);
 
@@ -64,6 +72,7 @@ function AddonModal({
     setName(addon?.name ?? ""); setType(addon?.type ?? "");
     setPrice(addon ? String(addon.price) : ""); setDiscount(addon?.discount ? String(addon.discount) : "");
     setDescription(addon?.description ?? "");
+    setStockRows([newStockRow(1)]);
   };
 
   return (
@@ -107,6 +116,7 @@ function AddonModal({
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-[13px] font-extrabold text-ink">Price:</h3>
           <button
+            onClick={() => setOpenStockModal(true)}
             className="inline-flex items-center gap-2 h-8 px-3 rounded-[9px] border text-[12.5px] font-bold transition-colors"
             style={{ background: "#FFF1EB", borderColor: "#F8C9B6", color: ORANGE }}>
             Setup stock consumption
@@ -134,7 +144,7 @@ function AddonModal({
           </div>
           <div className="mt-3 flex items-center gap-4 text-[12.5px]">
             <span className="text-warm-600">Listed Price: <span className="font-bold text-ink tnum">Rs {listedPrice.toFixed(2)}</span></span>
-            <span className="text-warm-600">COGS: <span className="font-bold text-ink tnum">Rs {cogs}</span></span>
+            <span className="text-warm-600">COGS: <span className="font-bold text-ink tnum">Rs {cogs.toFixed(2)}</span></span>
             <span className="font-bold tnum" style={{ color: "#15803D" }}>Gross Profit: Rs {grossProfit.toFixed(2)}</span>
           </div>
         </div>
@@ -153,6 +163,15 @@ function AddonModal({
           classNames={{ inputWrapper: `${wrapCx} h-auto min-h-[88px]`, input: inputCx }}
         />
       </div>
+
+      {openStockModal && (
+        <StockConsumptionModal
+          rows={stockRows}
+          setRows={setStockRows}
+          onClose={() => setOpenStockModal(false)}
+          onSave={() => setOpenStockModal(false)}
+        />
+      )}
     </ModalShell>
   );
 }

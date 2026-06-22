@@ -57,9 +57,9 @@ const TXNS = [
 
 function rs(n: number) { return `Rs ${n.toLocaleString()}`; }
 
-function StatCard({ icon: Icon, label, value, delta, up, tint, accent }: { icon: typeof PieChart; label: string; value: string; delta: string; up: boolean; tint: string; accent: string }) {
+function StatCard({ icon: Icon, label, value, delta, up, tint, accent, cardBg, border }: { icon: typeof PieChart; label: string; value: string; delta: string; up: boolean; tint: string; accent: string; cardBg: string; border: string }) {
   return (
-    <div className="flex-1 min-w-0 bg-white border border-[#EEEAE6] rounded-2xl p-4 px-[18px]" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
+    <div className="flex-1 min-w-0 rounded-2xl p-4 px-[18px]" style={{ background: cardBg, border: `1px solid ${border}`, boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-[9px]">
           <span className="w-[30px] h-[30px] rounded-[9px] flex items-center justify-center" style={{ background: tint }}><Icon size={16} color={accent} /></span>
@@ -70,7 +70,33 @@ function StatCard({ icon: Icon, label, value, delta, up, tint, accent }: { icon:
         </span>
       </div>
       <div className="text-[24px] font-bold text-ink tracking-[-0.02em] tnum mt-2">{value}</div>
+      <div className="text-[12px] text-warm-500 mt-[2px]">vs previous period</div>
     </div>
+  );
+}
+
+/* area + line chart for Sales Overview */
+function SalesChart({ data }: { data: number[] }) {
+  const W = 720, H = 180, pad = 8;
+  const max = Math.max(...data, 1);
+  const stepX = (W - pad * 2) / (data.length - 1);
+  const pts = data.map((v, i) => [pad + i * stepX, H - pad - (v / max) * (H - pad * 2)] as const);
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const area = `${line} L${pts[pts.length - 1][0].toFixed(1)} ${H - pad} L${pts[0][0].toFixed(1)} ${H - pad} Z`;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-[180px]" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={ORANGE} stopOpacity="0.22" />
+          <stop offset="100%" stopColor={ORANGE} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {[0, 0.25, 0.5, 0.75, 1].map((g) => (
+        <line key={g} x1={pad} x2={W - pad} y1={pad + g * (H - pad * 2)} y2={pad + g * (H - pad * 2)} stroke="#EFEAE6" strokeWidth="1" />
+      ))}
+      <path d={area} fill="url(#salesFill)" />
+      <path d={line} fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -92,7 +118,6 @@ function SummaryCard({ icon: Icon, tint, accent, title, subtitle, children }: { 
 export default function DashboardPage() {
   const [tab, setTab] = useState<"overview" | "finance" | "order">("overview");
   const totalSales = SALES_BREAKDOWN.reduce((s, b) => s + b.value, 0);
-  const maxH = Math.max(...HOURLY);
 
   return (
     <>
@@ -117,15 +142,15 @@ export default function DashboardPage() {
 
       {/* top stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px]">
-        <StatCard icon={PieChart} label="Sales" value={rs(totalSales)} delta="12.4%" up tint="#E0F2FE" accent="#0369A1" />
-        <StatCard icon={ShoppingCart} label="Purchase" value={rs(8200)} delta="3.1%" up tint="#FEF3E2" accent="#F59E0B" />
-        <StatCard icon={TrendingUp} label="Income" value={rs(totalSales - 8200)} delta="9.8%" up tint="#E7F6EC" accent="#15803D" />
-        <StatCard icon={Wallet} label="Expenses" value={rs(3150)} delta="2.2%" up={false} tint="#FDECE4" accent={ORANGE} />
+        <StatCard icon={PieChart} label="Sales" value={rs(totalSales)} delta="12.4%" up tint="#E0F2FE" accent="#0369A1" cardBg="linear-gradient(135deg,#EFF6FF,#FFFFFF)" border="#DCEBFB" />
+        <StatCard icon={ShoppingCart} label="Purchase" value={rs(8200)} delta="3.1%" up tint="#FEF3E2" accent="#F59E0B" cardBg="linear-gradient(135deg,#FFFBEB,#FFFFFF)" border="#F6ECCF" />
+        <StatCard icon={TrendingUp} label="Income" value={rs(totalSales - 8200)} delta="9.8%" up tint="#E7F6EC" accent="#15803D" cardBg="linear-gradient(135deg,#F0FDF4,#FFFFFF)" border="#D5EFDD" />
+        <StatCard icon={Wallet} label="Expenses" value={rs(3150)} delta="2.2%" up={false} tint="#FDECE4" accent={ORANGE} cardBg="linear-gradient(135deg,#FEF2F2,#FFFFFF)" border="#F8DAD2" />
       </div>
 
       {/* sales + overview */}
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-[14px]">
-        <div className="bg-white border border-[#EEEAE6] rounded-2xl p-5" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
+        <div className="rounded-2xl p-5" style={{ background: "linear-gradient(150deg,#FFF1F0,#FFF8F6)", border: "1px solid #F8DAD2", boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
           <div className="text-[13px] font-semibold text-warm-500">Sales</div>
           <div className="flex items-end justify-between gap-2 mt-1">
             <div><div className="text-[26px] font-bold text-ink tracking-[-0.02em] tnum">{rs(totalSales)}</div>
@@ -151,11 +176,7 @@ export default function DashboardPage() {
         <div className="bg-white border border-[#EEEAE6] rounded-2xl p-5" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
           <div className="text-[15px] font-extrabold text-ink">Sales Overview</div>
           <div className="text-[12.5px] text-warm-500 mb-3">Here is a live overview of your sales</div>
-          <div className="flex items-end gap-[5px] h-[180px]">
-            {HOURLY.map((v, i) => (
-              <div key={i} className="flex-1 rounded-t-[3px]" style={{ height: `${(v / maxH) * 100}%`, background: `linear-gradient(180deg, ${ORANGE}, #F8C9B6)` }} title={`${v} orders`} />
-            ))}
-          </div>
+          <SalesChart data={HOURLY} />
           <div className="flex justify-between text-[10.5px] text-warm-400 mt-2"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span></div>
         </div>
       </div>

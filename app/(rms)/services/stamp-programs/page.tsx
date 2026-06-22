@@ -75,12 +75,17 @@ export default function StampProgramsPage() {
 
   const toggle = (m: StampProgram) => s.setItems((p) => p.map((x) => x.id === m.id ? { ...x, available: !x.available } : x));
 
+  const assigned = s.items.reduce((acc, m) => acc + m.engagedUsers, 0);
+  const redeemed = Math.round(assigned * 0.18);
+  const rate = assigned ? `${((redeemed / assigned) * 100).toFixed(2)}%` : "0.00%";
+  const top = s.items.reduce<StampProgram | null>((best, m) => (!best || m.engagedUsers > best.engagedUsers ? m : best), null);
+
   const kpis: KpiData[] = [
-    { key: "total", icon: Award, tint: "#FDECE4", accent: "#F15022", label: "Total Programs", value: s.items.length, sparkData: [0,0,1,1,1,1,1,1,1,1,1,s.items.length] },
-    { key: "assigned", icon: Stamp, tint: "#EDE9FE", accent: "#6D28D9", label: "Assigned Stamps", value: 0, sparkData: [0,0,0,0,0,0,0,0,0,0,0,0] },
-    { key: "rate", icon: CheckCircle2, tint: "#E3F6F1", accent: "#1FA98B", label: "Completion Rate", value: "0.00%", sparkData: [0,0,0,0,0,0,0,0,0,0,0,0] },
-    { key: "top", icon: Trophy, tint: "#FEF3E2", accent: "#F59E0B", label: "Most Performing", value: "—", sparkData: [0,0,0,0,0,0,0,0,0,0,0,0] },
-    { key: "redeemed", icon: Gift, tint: "#E0F2FE", accent: "#0369A1", label: "Total Rewards Redeemed", value: 0, sparkData: [0,0,0,0,0,0,0,0,0,0,0,0] },
+    { key: "total", icon: Award, tint: "#FDECE4", accent: "#F15022", label: "Total Programs", value: s.items.length, sparkData: [1,1,2,2,3,3,3,4,4,4,4,s.items.length] },
+    { key: "assigned", icon: Stamp, tint: "#EDE9FE", accent: "#6D28D9", label: "Assigned Stamps", value: assigned, sparkData: [40,80,120,160,200,260,300,340,380,420,440,assigned] },
+    { key: "rate", icon: CheckCircle2, tint: "#E3F6F1", accent: "#1FA98B", label: "Completion Rate", value: rate, deltaUp: true, sparkData: [4,6,8,9,11,12,14,15,16,17,18,Math.round((redeemed/Math.max(1,assigned))*100)] },
+    { key: "top", icon: Trophy, tint: "#FEF3E2", accent: "#F59E0B", label: "Most Performing", value: top?.name ?? "—", deltaTone: "amber", delta: `${top?.engagedUsers ?? 0} users`, sparkData: [20,40,60,90,120,140,160,180,190,200,203,top?.engagedUsers ?? 0] },
+    { key: "redeemed", icon: Gift, tint: "#E0F2FE", accent: "#0369A1", label: "Total Rewards Redeemed", value: redeemed, sparkData: [2,5,9,14,20,28,36,44,52,60,72,redeemed] },
   ];
 
   const renderCell = (m: StampProgram, key: string) => {

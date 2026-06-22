@@ -5,12 +5,12 @@ import {
   Button, Input, Textarea, Tabs, Tab,
 } from "@heroui/react";
 import {
-  Send, Wallet, MessageSquare, MessagesSquare, Receipt, Search, Upload, UsersRound, Info, X,
+  Send, Wallet, MessageSquare, MessagesSquare, Receipt, Upload, UsersRound, Info, X,
 } from "lucide-react";
-import { PageHeader, ORANGE } from "@/components/rms/primitives";
+import { PageHeader, ORANGE, Badge, Tone } from "@/components/rms/primitives";
 import { GreenSwitch } from "@/components/rms/services/ui";
 import { ModalShell, labelCx, wrapCx, inputCx } from "@/components/rms/ModalShell";
-import { SMS_EVENTS } from "@/components/rms/data/services";
+import { SMS_EVENTS, SMS_LOGS, SMS_PURCHASES, SMS_STATS } from "@/components/rms/data/services";
 
 const SMS_RATE = 1.5;
 
@@ -40,10 +40,10 @@ export default function SmsPage() {
 
       {/* stats + promo */}
       <div className="grid grid-cols-1 lg:grid-cols-[repeat(4,1fr)_1.4fr] gap-[14px]">
-        <StatCard icon={Wallet} tint="#EDE9FE" accent="#6D28D9" label="Available Balance" value="Rs 10" />
-        <StatCard icon={MessageSquare} tint="#FEF3E2" accent="#F59E0B" label="Today's SMS" value="0" />
-        <StatCard icon={MessagesSquare} tint="#FDECE4" accent={ORANGE} label="Yesterday's SMS" value="0" />
-        <StatCard icon={Receipt} tint="#E3F6F1" accent="#1FA98B" label="Total Transactions" value="Rs 0" />
+        <StatCard icon={Wallet} tint="#EDE9FE" accent="#6D28D9" label="Available Balance" value={`Rs ${SMS_STATS.balance.toFixed(2)}`} />
+        <StatCard icon={MessageSquare} tint="#FEF3E2" accent="#F59E0B" label="Today's SMS" value={String(SMS_STATS.today)} />
+        <StatCard icon={MessagesSquare} tint="#FDECE4" accent={ORANGE} label="Yesterday's SMS" value={String(SMS_STATS.yesterday)} />
+        <StatCard icon={Receipt} tint="#E3F6F1" accent="#1FA98B" label="Total Transactions" value={`Rs ${SMS_STATS.totalTransactions.toLocaleString()}`} />
         <div className="bg-white border border-[#EEEAE6] rounded-2xl p-4 flex flex-col gap-3" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
           <span className="text-[13px] font-semibold text-warm-600">Keep your customer communication active, instant &amp; professional.</span>
           <Button radius="md" className="h-10 font-bold text-white" style={{ background: "linear-gradient(90deg,#3F2A8C,#D8420F)" }}>Load SMS</Button>
@@ -58,9 +58,32 @@ export default function SmsPage() {
       </Tabs>
 
       {tab === "logs" && (
-        <EmptyTable
-          columns={["SN", "Mobile Number", "Name", "Carrier", "Message", "Rate", "Event", "SMS Type", "Status", "Sent At"]}
-          title="No SMS logs found" hint="No SMS logs found." />
+        <div className="bg-white border border-[#EEEAE6] rounded-2xl overflow-x-auto no-sb" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
+          <div className="min-w-[1000px]">
+            <div className="grid bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em]"
+              style={{ gridTemplateColumns: "44px 1.3fr 1.2fr 0.8fr 1.8fr 60px 1.3fr 1.1fr 1fr 1.3fr" }}>
+              <span>SN</span><span>Mobile Number</span><span>Name</span><span>Carrier</span><span>Message</span><span>Rate</span><span>Event</span><span>SMS Type</span><span>Status</span><span>Sent At</span>
+            </div>
+            {SMS_LOGS.map((l, i) => {
+              const tone: Tone = l.status === "Delivered" ? "success" : l.status === "Failed" ? "danger" : "warning";
+              return (
+                <div key={l.id} className="grid items-center px-4 py-3 border-t border-warm-200 text-[12.5px]"
+                  style={{ gridTemplateColumns: "44px 1.3fr 1.2fr 0.8fr 1.8fr 60px 1.3fr 1.1fr 1fr 1.3fr" }}>
+                  <span className="font-mono text-warm-500">{i + 1}</span>
+                  <span className="tnum text-ink">{l.mobile}</span>
+                  <span className="font-semibold text-ink truncate">{l.name}</span>
+                  <span className="text-warm-600">{l.carrier}</span>
+                  <span className="text-warm-600 truncate">{l.message}</span>
+                  <span className="tnum text-warm-700">{l.rate}</span>
+                  <span className="text-warm-600 truncate">{l.event}</span>
+                  <span className="text-warm-600">{l.type}</span>
+                  <Badge tone={tone}>{l.status}</Badge>
+                  <span className="tnum text-warm-500">{l.sentAt}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
       {tab === "events" && (
         <div className="bg-white border border-[#EEEAE6] rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
@@ -82,27 +105,26 @@ export default function SmsPage() {
         </div>
       )}
       {tab === "history" && (
-        <EmptyTable columns={["SN", "User", "Amount", "Payment Method", "Purchase At"]}
-          title="No SMS Purchase History found" hint="No SMS purchase history found." />
+        <div className="bg-white border border-[#EEEAE6] rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
+          <div className="grid bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em]"
+            style={{ gridTemplateColumns: "44px 1.5fr 1fr 1.2fr 1.5fr" }}>
+            <span>SN</span><span>User</span><span>Amount</span><span>Payment Method</span><span>Purchase At</span>
+          </div>
+          {SMS_PURCHASES.map((p, i) => (
+            <div key={p.id} className="grid items-center px-4 py-3 border-t border-warm-200 text-[13px]"
+              style={{ gridTemplateColumns: "44px 1.5fr 1fr 1.2fr 1.5fr" }}>
+              <span className="font-mono text-warm-500">{i + 1}</span>
+              <span className="font-semibold text-ink">{p.user}</span>
+              <span className="tnum font-bold text-ink">Rs {p.amount.toLocaleString()}</span>
+              <span className="text-warm-600">{p.method}</span>
+              <span className="tnum text-warm-500">{p.purchasedAt}</span>
+            </div>
+          ))}
+        </div>
       )}
 
       {bulkOpen && <SendBulkModal onClose={() => setBulkOpen(false)} />}
     </>
-  );
-}
-
-function EmptyTable({ columns, title, hint }: { columns: string[]; title: string; hint: string }) {
-  return (
-    <div className="bg-white border border-[#EEEAE6] rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
-      <div className="flex gap-4 bg-cream border-b border-warm-200 px-4 py-[10px] text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em] overflow-x-auto no-sb">
-        {columns.map((c) => <span key={c} className="whitespace-nowrap">{c}</span>)}
-      </div>
-      <div className="py-[70px] text-center">
-        <div className="w-[60px] h-[60px] rounded-full bg-warm-100 inline-flex items-center justify-center mb-3"><Search size={24} color="#C9BCB0" /></div>
-        <div className="text-[15px] font-extrabold text-ink">{title}</div>
-        <div className="text-[13px] text-warm-500 mt-1">{hint}</div>
-      </div>
-    </div>
   );
 }
 

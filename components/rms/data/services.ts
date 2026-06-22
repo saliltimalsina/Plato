@@ -32,7 +32,25 @@ export const DELIVERY_PARTNERS: DeliveryPartner[] = [
 export interface Rider { id: number; name: string; phone: string; role: string }
 export const RIDERS: Rider[] = [
   { id: 1, name: "Salil Timalsina", phone: "977 9840171882", role: "Staff" },
+  { id: 2, name: "Bibek Gurung",    phone: "977 9812345678", role: "Rider" },
+  { id: 3, name: "Anish Shrestha",  phone: "977 9803456789", role: "Rider" },
 ];
+
+export interface SmsLog { id: number; mobile: string; name: string; carrier: string; message: string; rate: number; event: string; type: string; status: "Delivered" | "Failed" | "Pending"; sentAt: string }
+export const SMS_LOGS: SmsLog[] = [
+  { id: 1, mobile: "+977 9840171882", name: "Salil Timalsina", carrier: "Ncell",     message: "Happy Birthday, Salil!",            rate: 1.5, event: "Customer Birthday",       type: "Promotional", status: "Delivered", sentAt: "06-20-2026 09:12 AM" },
+  { id: 2, mobile: "+977 9812345678", name: "Bibek Gurung",    carrier: "NTC",       message: "Hi Bibek, we got your order!",     rate: 1.5, event: "Delivery Order Received", type: "Transactional", status: "Delivered", sentAt: "06-19-2026 06:45 PM" },
+  { id: 3, mobile: "+977 9803456789", name: "Anish Shrestha",  carrier: "Ncell",     message: "Your order has been delivered.",   rate: 1.5, event: "Delivery Order Completed", type: "Transactional", status: "Failed",    sentAt: "06-19-2026 07:30 PM" },
+  { id: 4, mobile: "+977 9856781234", name: "Sita Rai",        carrier: "NTC",       message: "Flat 20% off this weekend!",       rate: 1.5, event: "Bulk SMS",               type: "Promotional", status: "Delivered", sentAt: "06-18-2026 11:00 AM" },
+];
+
+export interface SmsPurchase { id: number; user: string; amount: number; method: string; purchasedAt: string }
+export const SMS_PURCHASES: SmsPurchase[] = [
+  { id: 1, user: "Salil Timalsina", amount: 500, method: "eSewa",  purchasedAt: "06-15-2026 10:20 AM" },
+  { id: 2, user: "Salil Timalsina", amount: 1000, method: "Khalti", purchasedAt: "06-01-2026 04:05 PM" },
+];
+
+export const SMS_STATS = { balance: 248.5, today: 12, yesterday: 8, totalTransactions: 1500 };
 
 export interface SmsEvent { id: number; event: string; status: boolean; description: string; message: string; consumption: number }
 export const SMS_EVENTS: SmsEvent[] = [
@@ -47,5 +65,8 @@ export interface StampProgram {
   reward: string; expiresIn: string; description?: string; available: boolean;
 }
 export const STAMP_PROGRAMS: StampProgram[] = [
-  { id: 1, name: "Loyuwa", engagedUsers: 0, stampsRequired: 10, reward: "asd", expiresIn: "20 days", description: "", available: true },
+  { id: 1, name: "Coffee Lovers",    engagedUsers: 124, stampsRequired: 8,  reward: "Free Coffee",       expiresIn: "30 days", description: "Buy 8 coffees, get 1 free.", available: true },
+  { id: 2, name: "Pizza Club",       engagedUsers: 86,  stampsRequired: 10, reward: "Free Garlic Bread", expiresIn: "60 days", description: "Earn a free garlic bread.",  available: true },
+  { id: 3, name: "Weekend Brunch",   engagedUsers: 41,  stampsRequired: 6,  reward: "20% Off",           expiresIn: "14 days", description: "", available: false },
+  { id: 4, name: "Loyalty Rewards",  engagedUsers: 203, stampsRequired: 12, reward: "Free Dessert",      expiresIn: "90 days", description: "Our flagship loyalty program.", available: true },
 ];

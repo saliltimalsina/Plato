@@ -94,16 +94,18 @@ export default function CreateComboOfferPage() {
     <div className="flex flex-col min-h-0 flex-1 -mx-4 lg:-mx-8 px-4 lg:px-8 pb-6">
       {/* header */}
       <div className="flex items-center gap-3 py-4">
-        <button onClick={() => router.back()}
-          className="w-9 h-9 rounded-[10px] border border-[#E6E1DC] bg-white inline-flex items-center justify-center">
+        <Button isIconOnly size="sm" variant="bordered" radius="md"
+          className="w-9 h-9 min-w-9 border border-[#E6E1DC] bg-white"
+          onPress={() => router.back()}>
           <ArrowLeft size={18} color={ORANGE} />
-        </button>
-        <h1 className="text-[20px] font-extrabold text-ink tracking-[-0.02em]">Create Combo Offer</h1>
+        </Button>
+        <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-ink m-0">Create Combo Offer</h1>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-5 flex-1 min-h-0">
         {/* form */}
-        <div className="flex-1 min-w-0 flex flex-col gap-5">
+        <div className="flex-1 min-w-0 bg-white border border-[#EEEAE6] rounded-2xl p-5 flex flex-col gap-5"
+          style={{ boxShadow: "0 1px 2px rgba(40,30,20,0.03)" }}>
           {/* row: Type / Combo Name / HS Code */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Select
@@ -128,9 +130,9 @@ export default function CreateComboOfferPage() {
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_280px] gap-4 items-end">
             <div className="flex flex-col gap-2">
               <span className={labelCx}>Combo Photo</span>
-              <label className="border border-dashed border-[#E6E1DC] bg-warm-50/40 rounded-[10px] px-4 py-3 flex items-center gap-2 cursor-pointer hover:bg-warm-100">
-                <UploadCloud size={18} color="#9A8C80" />
-                <span className="text-[13px] text-warm-500">Click here to upload your image</span>
+              <label className="w-full flex items-center gap-3 h-11 px-3 rounded-[10px] border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors text-left cursor-pointer">
+                <UploadCloud size={16} color="#8A7D72" />
+                <span className="text-[13px] text-warm-500 font-medium">Click here to upload your image</span>
                 <input type="file" accept="image/*" className="hidden" />
               </label>
             </div>
@@ -152,7 +154,7 @@ export default function CreateComboOfferPage() {
 
           {/* Menu section */}
           <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-extrabold text-ink">Menu:</span>
+            <span className="text-[13px] font-extrabold text-ink">Menu:</span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Select
                 label={<>Sub-Menu<Req /></>} labelPlacement="outside" placeholder="Select Sub-Menu"
@@ -177,7 +179,7 @@ export default function CreateComboOfferPage() {
 
           {/* Selected Combo Dishes */}
           <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-extrabold text-ink">Selected Combo Dishes</span>
+            <span className="text-[13px] font-extrabold text-ink">Selected Combo Dishes</span>
             <span className="text-[12px] text-warm-500">{items.length} items selected</span>
             <div className="border border-warm-200 rounded-[12px] overflow-hidden">
               <div className="grid bg-cream border-b border-warm-200 px-3 py-2 text-[11px] font-bold text-warm-600 uppercase tracking-[0.04em]"
@@ -245,7 +247,7 @@ export default function CreateComboOfferPage() {
 
           {/* Description */}
           <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-extrabold text-ink">Description:</span>
+            <span className="text-[13px] font-extrabold text-ink">Description:</span>
             <Textarea
               variant="bordered" placeholder="Enter description"
               minRows={5} value={description} onValueChange={setDescription}
@@ -300,8 +302,8 @@ export default function CreateComboOfferPage() {
       </div>
 
       {/* footer */}
-      <div className="flex justify-center gap-3 mt-6 border-t border-warm-200 pt-5">
-        <Button variant="bordered" radius="md" className="border border-[#E6E1DC] bg-white font-semibold text-warm-600 px-8" onPress={reset}>
+      <div className="flex items-center justify-end gap-3 mt-6 border-t border-warm-200 pt-5 flex-wrap">
+        <Button variant="light" radius="md" className="font-semibold text-warm-600" onPress={reset}>
           Reset
         </Button>
         <Button
@@ -309,8 +311,8 @@ export default function CreateComboOfferPage() {
           isDisabled={!valid}
           className="font-bold disabled:opacity-100 px-10"
           style={{
-            background: valid ? ORANGE : "#F0B5A5",
-            color: "#fff",
+            background: valid ? ORANGE : "#EFE8E2",
+            color: valid ? "#fff" : "#B7A99E",
             boxShadow: valid ? "0 2px 8px rgba(241,80,34,0.32)" : "none",
           }}
           onPress={() => { if (valid) router.push("/menu/combo-offers"); }}

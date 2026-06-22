@@ -8,6 +8,9 @@ import { PageHeader, ORANGE } from "@/components/rms/primitives";
 const ORDER_NOTIFS = [
   { id: 1, title: "Order updated", body: <><b className="text-ink">Salil Timalsina</b> has changed status from Pending to Billed for Table order <b className="text-ink">Cabin 1</b>.</>, time: "04:56 PM / 06-22-2026", kot: false },
   { id: 2, title: "Order created", body: <><b className="text-ink">Salil Timalsina</b> created Table order for <b className="text-ink">Cabin 1</b>.</>, time: "04:56 PM / 06-22-2026", kot: true },
+  { id: 3, title: "Order created", body: <><b className="text-ink">Bibek Gurung</b> created Table order for <b className="text-ink">Booth B</b>.</>, time: "05:14 PM / 06-22-2026", kot: true },
+  { id: 4, title: "Order updated", body: <><b className="text-ink">Salil Timalsina</b> added 2× <b className="text-ink">Burger</b> to Table order <b className="text-ink">Table 2</b>.</>, time: "05:10 PM / 06-22-2026", kot: false },
+  { id: 5, title: "Payment received", body: <>Payment of <b className="text-ink">Rs 570</b> received for <b className="text-ink">Cabin 2</b> via eSewa.</>, time: "05:02 PM / 06-22-2026", kot: false },
 ];
 
 const ACTIVITY = [

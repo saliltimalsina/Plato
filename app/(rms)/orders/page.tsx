@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import {
-  Button, Input, Modal, ModalContent, Tabs, Tab,
+  Button, Input, Modal, ModalContent, Tabs, Tab, Tooltip,
   Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Popover, PopoverTrigger, PopoverContent,
 } from "@heroui/react";
 import {
   Search, Plus, ChevronDown, MoreHorizontal, MoreVertical, Utensils, Bike, CalendarCheck,
   ShoppingBag, ShoppingCart, FileText, X, Scissors, Printer, UserPlus, ChevronRight, Zap,
+  BadgeCheck, Copy, Pin, Trash2,
 } from "lucide-react";
 import { PageHeader, ORANGE, Badge, Tone } from "@/components/rms/primitives";
 import { wrapCx, inputCx } from "@/components/rms/ModalShell";
@@ -116,10 +117,10 @@ function OrdersTab() {
 /* order card: dish lines by default → checkout actions on hover */
 function OrderCard({ order: o }: { order: OpenOrder }) {
   const actions = [
-    { icon: Plus, label: "Add items" },
-    { icon: Printer, label: "Print" },
-    { icon: FileText, label: "Bill" },
-    { icon: Zap, label: "Quick checkout" },
+    { icon: Plus,     label: "Add Order" },
+    { icon: Printer,  label: "Print Order" },
+    { icon: FileText, label: "Send Bill" },
+    { icon: Zap,      label: "Quick Checkout" },
   ];
   return (
     <div className="w-[300px]">
@@ -145,7 +146,27 @@ function OrderCard({ order: o }: { order: OpenOrder }) {
 
         {/* hover: total + quick actions */}
         <div className="absolute inset-0 rounded-[12px] bg-white p-4 flex flex-col opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150">
-          <button aria-label="More" className="absolute top-3 right-3 w-7 h-7 rounded-[8px] inline-flex items-center justify-center hover:bg-warm-100"><MoreVertical size={16} color="#9A8C80" /></button>
+          {/* More menu — HeroUI dropdown */}
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Button isIconOnly size="sm" variant="light" radius="sm"
+                className="absolute top-3 right-3 w-7 h-7 min-w-7"
+                aria-label="More actions">
+                <MoreVertical size={16} color="#9A8C80" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Order actions">
+              <DropdownItem key="unbilled" startContent={<BadgeCheck size={15} color={ORANGE} />}>Marked as Unbilled</DropdownItem>
+              <DropdownItem key="duplicate" startContent={<Copy size={15} color="#8A7D72" />}>Duplicate Order</DropdownItem>
+              <DropdownItem key="pin" startContent={<Pin size={15} color="#8A7D72" />}>Pin Order To Top</DropdownItem>
+              <DropdownItem key="print-slip" startContent={<Printer size={15} color="#8A7D72" />}>Print Order Slip</DropdownItem>
+              <DropdownItem key="clear" className="text-[#F15022]" color="danger"
+                startContent={<Trash2 size={15} color={ORANGE} />}>
+                Clear Order
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+
           <div className="flex-1 flex flex-col items-center justify-center text-center">
             <div className="text-[26px] font-extrabold text-ink tnum">Rs {o.total}</div>
             <div className="text-[13px] text-warm-500 mt-1">Click to view full order details.</div>
@@ -154,10 +175,17 @@ function OrderCard({ order: o }: { order: OpenOrder }) {
             {actions.map((a) => {
               const Icon = a.icon;
               return (
-                <button key={a.label} aria-label={a.label}
-                  className="w-[44px] h-[44px] rounded-[10px] border border-[#E6E1DC] bg-white inline-flex items-center justify-center hover:bg-warm-50 transition-colors">
-                  <Icon size={18} color="#3F3933" />
-                </button>
+                <Tooltip key={a.label} content={a.label} placement="top" delay={120} closeDelay={0}
+                  classNames={{
+                    base: "before:bg-[#1F1A14]",
+                    content: "bg-[#1F1A14] text-white text-[12px] font-semibold px-2 py-[5px] rounded-md",
+                  }}>
+                  <Button isIconOnly variant="bordered" radius="md" size="md"
+                    aria-label={a.label}
+                    className="w-[44px] h-[44px] min-w-[44px] border border-[#E6E1DC] bg-white hover:bg-warm-50">
+                    <Icon size={18} color="#3F3933" />
+                  </Button>
+                </Tooltip>
               );
             })}
           </div>

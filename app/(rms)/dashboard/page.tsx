@@ -6,6 +6,7 @@ import {
   PieChart, ShoppingCart, TrendingUp, Wallet, ChevronDown, Calendar, ChevronRight,
   Bell, CalendarCheck, Bike, ShoppingBag, UsersRound, ArrowDownLeft, ArrowUpRight,
   ArrowLeftRight, Plus, Printer, UtensilsCrossed, ClipboardList, Receipt, Armchair, BookOpen,
+  ChefHat, Coffee, FileText,
 } from "lucide-react";
 import { Spark, ORANGE, KpiRow, KpiData } from "@/components/rms/primitives";
 
@@ -265,6 +266,14 @@ function TxnTable() {
             style={{ gridTemplateColumns: "1fr 1fr 1fr 1.6fr 0.9fr 1fr 0.9fr 0.9fr 0.9fr 1.3fr" }}>
             <span>Entry Date</span><span>TXN Date</span><span>TXN No</span><span>Particular</span><span>TXN Type</span><span>Parties</span><span>PMT Mode</span><span className="text-right">Amount</span><span>Status</span><span>Entry By</span>
           </div>
+          {TXNS.length === 0 && (
+            <div className="py-[60px] flex flex-col items-center gap-2">
+              <span className="w-[52px] h-[52px] rounded-full bg-warm-100 flex items-center justify-center">
+                <FileText size={24} color="#C9BCB0" />
+              </span>
+              <span className="text-[13px] font-semibold text-warm-500">No transactions yet.</span>
+            </div>
+          )}
           {TXNS.map((t) => (
             <div key={t.no} className="grid items-center px-4 py-3 border-t border-warm-200 text-[12.5px]"
               style={{ gridTemplateColumns: "1fr 1fr 1fr 1.6fr 0.9fr 1fr 0.9fr 0.9fr 0.9fr 1.3fr" }}>
@@ -403,13 +412,32 @@ function OverviewTab() {
         </SummaryCard>
       </div>
 
-      <div className="rounded-2xl p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg,#D8420F,#F15022)" }}>
-        <h2 className="text-[22px] font-extrabold text-white tracking-[-0.02em]">Do you know your best-selling dishes?</h2>
-        <p className="text-[13px] text-white/85 mt-1">We have listed the top 5 best-selling dishes, top categories, and add-ons here.</p>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[14px] mt-5">
-          <BestCard title="Top Selling Dishes" subtitle="More people loved these dishes." rows={TOP_DISHES} unit="sold" />
-          <BestCard title="Top Selling Add-Ons" subtitle="More people loved these add-ons." rows={TOP_ADDONS} unit="sold" />
-          <BestCard title="Top Selling Category" subtitle="More people loved this category." rows={TOP_CATEGORIES} unit="sold" />
+      <div>
+        <div className="rounded-t-2xl px-6 pt-6 pb-10 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg,#D8420F,#F15022)" }}>
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-12 opacity-25"
+            style={{
+              background:
+                "radial-gradient(120% 80% at 20% 0%, transparent 60%, rgba(255,255,255,0.18) 61%, transparent 70%), " +
+                "radial-gradient(120% 80% at 80% 0%, transparent 55%, rgba(255,255,255,0.12) 56%, transparent 65%)",
+            }} />
+          <h2 className="text-[22px] font-extrabold text-white tracking-[-0.02em] relative">Do you know your best-selling dishes?</h2>
+          <p className="text-[13px] text-white/85 mt-1 max-w-[420px] relative">
+            We have listed the top 5 best-selling dishes, top categories, and add-ons here.
+          </p>
+          <Button
+            size="sm" radius="md"
+            className="mt-4 bg-white text-ink font-bold relative shadow-[0_2px_8px_rgba(0,0,0,0.18)]"
+            startContent={<Plus size={14} color="#1F1A14" strokeWidth={2.4} />}
+            endContent={<ChefHat size={14} color={ORANGE} />}
+          >
+            Add New Dish
+          </Button>
+        </div>
+        <div className="bg-cream rounded-b-2xl pt-4 px-4 lg:px-6 pb-2 -mt-2 grid grid-cols-1 lg:grid-cols-3 gap-[14px]">
+          <BestCard title="Top Selling Dishes" subtitle="More people loved these dishes." rows={TOP_DISHES} unit="sold" emptyIcon={UtensilsCrossed} emptyLabel="No Dishes Sold Yet!" />
+          <BestCard title="Top Selling Add-Ons" subtitle="More people loved these add-ons." rows={TOP_ADDONS} unit="sold" emptyIcon={Coffee} emptyLabel="No Add-Ons Sold Yet!" />
+          <BestCard title="Top Selling Category" subtitle="More people loved this category." rows={TOP_CATEGORIES} unit="sold" emptyIcon={UtensilsCrossed} emptyLabel="No Categories Sold Yet!" />
         </div>
       </div>
 
@@ -595,25 +623,47 @@ function OrderTab() {
 }
 
 /* ── small shared pieces ─────────────────────────────────────── */
-function BestCard({ title, subtitle, rows, unit }: { title: string; subtitle: string; rows: { emoji: string; name: string; sold: number }[]; unit: string }) {
+function BestCard({
+  title, subtitle, rows, unit, emptyIcon: EmptyIcon, emptyLabel,
+}: {
+  title: string;
+  subtitle: string;
+  rows: { emoji: string; name: string; sold: number }[];
+  unit: string;
+  emptyIcon?: typeof UtensilsCrossed;
+  emptyLabel?: string;
+}) {
   return (
-    <div className="bg-white rounded-2xl p-4">
+    <div className="bg-white rounded-2xl p-4 shadow-[0_8px_24px_-12px_rgba(60,30,15,0.18)] border border-[#EEEAE6] min-h-[220px] flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <div><div className="text-[13.5px] font-extrabold text-ink">{title}</div><div className="text-[11.5px] text-warm-500">{subtitle}</div></div>
         <ViewAllBtn />
       </div>
-      <div className="flex flex-col gap-2">
-        {rows.map((r, i) => (
-          <div key={r.name} className="flex items-center justify-between text-[13px]">
-            <span className="flex items-center gap-2">
-              <span className="text-warm-400 font-bold tnum w-4">{i + 1}</span>
-              <span className="text-[16px]">{r.emoji}</span>
-              <span className="font-semibold text-ink">{r.name}</span>
+      {rows.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
+          {EmptyIcon && (
+            <span className="w-[52px] h-[52px] rounded-full bg-warm-100 flex items-center justify-center">
+              <EmptyIcon size={26} color="#C9BCB0" />
             </span>
-            <span className="text-warm-600 tnum">{r.sold} {unit}</span>
-          </div>
-        ))}
-      </div>
+          )}
+          <span className="text-[13px] font-semibold text-warm-500">
+            {emptyLabel ?? "No data yet"}
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {rows.map((r, i) => (
+            <div key={r.name} className="flex items-center justify-between text-[13px]">
+              <span className="flex items-center gap-2">
+                <span className="text-warm-400 font-bold tnum w-4">{i + 1}</span>
+                <span className="text-[16px]">{r.emoji}</span>
+                <span className="font-semibold text-ink">{r.name}</span>
+              </span>
+              <span className="text-warm-600 tnum">{r.sold} {unit}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

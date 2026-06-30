@@ -6,14 +6,14 @@ import {
   Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Popover, PopoverTrigger, PopoverContent,
 } from "@heroui/react";
 import {
-  Search, Plus, ChevronDown, MoreHorizontal, Utensils, Bike, CalendarCheck,
-  ShoppingBag, ShoppingCart, FileText, X, Scissors, Printer, UserPlus, ChevronRight,
+  Search, Plus, ChevronDown, MoreHorizontal, MoreVertical, Utensils, Bike, CalendarCheck,
+  ShoppingBag, ShoppingCart, FileText, X, Scissors, Printer, UserPlus, ChevronRight, Zap,
 } from "lucide-react";
 import { PageHeader, ORANGE, Badge, Tone } from "@/components/rms/primitives";
 import { wrapCx, inputCx } from "@/components/rms/ModalShell";
 import { DISHES, Dish } from "@/components/rms/data/menu";
 import { TABLES, RestoTable, TableStatus } from "@/components/rms/data/tables";
-import { OPEN_ORDERS, KOTS, ORDER_TYPES, STAFF_LIST } from "@/components/rms/data/orders";
+import { OPEN_ORDERS, OpenOrder, KOTS, ORDER_TYPES, STAFF_LIST } from "@/components/rms/data/orders";
 
 const STATUS_TONE: Record<TableStatus, Tone> = { Open: "primary", Occupied: "success", Reserved: "warning" };
 const ORDER_TYPE_ICON: Record<string, typeof Utensils> = {
@@ -106,30 +106,66 @@ function OrdersTab() {
         <Utensils size={15} color="#6B5F55" /><span className="text-[13px] font-bold text-warm-700">Dine In</span>
         <span className="text-[12px] font-bold text-warm-500 bg-warm-100 rounded-md px-[7px]">{OPEN_ORDERS.length}</span>
       </div>
-      {OPEN_ORDERS.map((o) => (
-        <div key={o.id} className="max-w-[340px]">
-          <div className="text-[15px] font-extrabold text-ink mb-2">{o.table}</div>
-          <div className="rounded-[14px] border-2 p-4 bg-[#FFFBEB]" style={{ borderColor: "#F4D58A" }}>
-            <div className="flex items-center justify-between">
-              <span className="text-[13.5px] font-bold text-ink">{o.type}</span>
-              <span className="text-[12.5px] font-bold" style={{ color: "#15803D" }}>{o.placedAgo}</span>
-            </div>
-            <div className="mt-3 flex flex-col gap-[6px]">
-              {o.lines.map((l) => (
-                <div key={l.name} className="flex items-center justify-between text-[13px]">
-                  <span className="inline-flex items-center gap-2 text-warm-700"><span className="w-[6px] h-[6px] rounded-full" style={{ background: ORANGE }} />{l.name}</span>
-                  <span className="tnum font-semibold text-ink">{l.qty}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 pt-3 border-t border-[#EBD9A8] flex items-center justify-between text-[13px]">
-              <span className="text-warm-600">Dishes: <span className="font-bold text-ink">{o.lines.length}</span></span>
-              <span className="font-extrabold text-ink tnum">Rs {o.total}</span>
-            </div>
-          </div>
-        </div>
-      ))}
+      <div className="flex flex-wrap gap-5">
+        {OPEN_ORDERS.map((o) => <OrderCard key={o.id} order={o} />)}
+      </div>
     </>
+  );
+}
+
+/* order card: dish lines by default → checkout actions on hover */
+function OrderCard({ order: o }: { order: OpenOrder }) {
+  const actions = [
+    { icon: Plus, label: "Add items" },
+    { icon: Printer, label: "Print" },
+    { icon: FileText, label: "Bill" },
+    { icon: Zap, label: "Quick checkout" },
+  ];
+  return (
+    <div className="w-[300px]">
+      <div className="text-[15px] font-extrabold text-ink mb-2">{o.table}</div>
+      <div className="group relative rounded-[14px] border-2 border-[#F4D58A] bg-[#FFFBEB] p-4 min-h-[212px] transition-colors group-hover:border-[#E6E1DC]">
+        {/* default: dish lines */}
+        <div className="flex items-center justify-between">
+          <span className="text-[13.5px] font-bold text-ink">{o.type}</span>
+          <span className="text-[12.5px] font-bold" style={{ color: "#15803D" }}>{o.placedAgo}</span>
+        </div>
+        <div className="mt-3 flex flex-col gap-[6px]">
+          {o.lines.map((l) => (
+            <div key={l.name} className="flex items-center justify-between text-[13px]">
+              <span className="inline-flex items-center gap-2 text-warm-700"><span className="w-[6px] h-[6px] rounded-full" style={{ background: ORANGE }} />{l.name}</span>
+              <span className="tnum font-semibold text-ink">{l.qty}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 pt-3 border-t border-[#EBD9A8] flex items-center justify-between text-[13px]">
+          <span className="text-warm-600">Dishes: <span className="font-bold text-ink">{o.lines.length}</span></span>
+          <span className="font-extrabold text-ink tnum">Rs {o.total}</span>
+        </div>
+
+        {/* hover: total + quick actions */}
+        <div className="absolute inset-0 rounded-[12px] bg-white p-4 flex flex-col opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150">
+          <button aria-label="More" className="absolute top-3 right-3 w-7 h-7 rounded-[8px] inline-flex items-center justify-center hover:bg-warm-100"><MoreVertical size={16} color="#9A8C80" /></button>
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <div className="text-[26px] font-extrabold text-ink tnum">Rs {o.total}</div>
+            <div className="text-[13px] text-warm-500 mt-1">Click to view full order details.</div>
+          </div>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            {actions.map((a) => {
+              const Icon = a.icon;
+              return (
+                <button key={a.label} aria-label={a.label}
+                  className="w-[44px] h-[44px] rounded-[10px] border border-[#E6E1DC] bg-white inline-flex items-center justify-center hover:bg-warm-50 transition-colors">
+                  <Icon size={18} color="#3F3933" />
+                </button>
+              );
+            })}
+          </div>
+          <button className="h-[46px] rounded-[10px] border text-[14px] font-bold transition-colors"
+            style={{ borderColor: "#BBE7C9", background: "#F1FBF4", color: "#15803D" }}>Checkout</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
